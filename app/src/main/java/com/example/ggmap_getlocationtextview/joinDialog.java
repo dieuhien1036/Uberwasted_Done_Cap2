@@ -97,7 +97,7 @@ public class joinDialog extends BottomSheetDialogFragment implements DirectionFi
         txt_size.setText(size);
 
         //Load image của this waste vào dialog
-        final String image_url = "http://172.15.195.93/upload/uploads/" + image_name;
+        final String image_url = "http://192.168.1.10/upload/uploads/" + image_name;
         new LoadImages().execute(image_url);
 
         btn_join.setOnClickListener(new View.OnClickListener() {

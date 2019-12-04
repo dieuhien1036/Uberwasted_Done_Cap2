@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "985679858705",
+    "firebase_url": "https://notificationuberwasted.firebaseio.com",
+    "project_id": "notificationuberwasted",
+    "storage_bucket": "notificationuberwasted.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:985679858705:android:15f3595eeb19bd3442b5b0",
+        "android_client_info": {
+          "package_name": "com.example.ggmap_getlocationtextview"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "985679858705-8covpuuh4qe39295ef9bubrvvbq8k10s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsEYNWXukG7kciJodyvjEQ2PtC1xPYYIo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "985679858705-8covpuuh4qe39295ef9bubrvvbq8k10s.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

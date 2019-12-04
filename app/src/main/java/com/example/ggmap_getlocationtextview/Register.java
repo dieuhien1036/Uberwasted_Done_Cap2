@@ -31,7 +31,7 @@ public class Register extends AppCompatActivity {
     private EditText firstname, lastname, email, password, confirmPassword;
     private ImageButton imageButton_register;
     private RequestQueue requestQueue;
-    private static final String URL = "http://172.15.195.93/test/user_control.php";
+    private static final String URL = "http://192.168.1.10/test/user_control.php";
     private StringRequest request;
 
     private static final Pattern PASSWORD_PATTERN =
