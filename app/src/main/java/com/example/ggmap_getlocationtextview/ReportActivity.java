@@ -19,7 +19,9 @@ import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -121,16 +123,18 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
     }
     @Override
     public void onClick(View view) {
+        sendFCMPush();
         if (view == imageView) {
             Intent intent = new Intent();
             intent.setType("image/*");
             intent.setAction(Intent.ACTION_GET_CONTENT);
             startActivityForResult(Intent.createChooser(intent, "Complete action using"), IMAGE_REQUEST_CODE);
+
         } else if (view == btnReport) {
             uploadMultipart();
         }
 
-        sendFCMPush();
+
     }
 
     @Override
@@ -570,10 +574,13 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
             }
         }
     }
+
     private void sendFCMPush() {
+        MapsActivity m=new MapsActivity();
         final String SERVER_KEY = "AAAA5X8ZDBE:APA91bHDkSbJW0In5hLU_8mOwP9zhNuD_E3WzYi8-0W0UT_rAdIPy3HrmaxNlP__KjmipMjaaJ08AqQeB591ynOeMEKj2k31e-bm1y1jFUq_HvhonynWJkJVEjoR6DojXts2MTtM_AQB";
-        String msg = "Khánh đẹp trai vl";
-        String title = "UberWasted";
+        Log.e("cccccc",String.valueOf(addressWaste));
+        String title = "Uber";
+        String msg = "Have wasted near " + String.valueOf(addressWaste);
         String token = "epcG9vI67-E:APA91bFZH6i48Tm_6i2Ykf30JmHFjP0_rcv2Emqyc0ekk8GXTV4LtSc8DgxsjMrPJCJLnBqQBqRbGEzY7CuNYmIUwVgS1A0uTRUJgFRp_3O3-mYpYy4L4LaVGQi1XTVv1leadOuhEFJc";
 
         JSONObject obj = null;
@@ -592,7 +599,7 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
             objData.put("priority", "high");
 
             dataobjData = new JSONObject();
-            dataobjData.put("text", msg);
+            dataobjData.put("body", msg);
             dataobjData.put("title", title);
 
             obj.put("to", "/topics/allDevices");
@@ -633,6 +640,7 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
         requestQueue.add(jsObjRequest);
         FirebaseMessaging.getInstance().subscribeToTopic("allDevices");
     }
+
 
 }
 

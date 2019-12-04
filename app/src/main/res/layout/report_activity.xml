@@ -5,31 +5,23 @@
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="0dp"
+    android:background="@color/green"
+    android:orientation="vertical"
     android:paddingLeft="0dp"
-    android:paddingRight="0dp"
     android:paddingTop="0dp"
-    android:orientation="vertical">
+    android:paddingRight="0dp"
+    android:paddingBottom="0dp">
     <!--
     tools:context="com.example.uploadimage.MainActivity">
     -->
 
 
-    <TextView
-        android:id="@+id/textView_Report"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="Report"
-        android:textAllCaps="false"
-        android:textColor="#54c242"
-        android:textSize="30sp" />
-
     <ImageView
         android:id="@+id/image"
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:src="@mipmap/ic_launcher"/>
+        android:layout_marginTop="50dp"
+        android:src="@mipmap/ic_launcher" />
 
     <TextView
         android:id="@+id/path"
@@ -39,7 +31,7 @@
         android:layout_marginTop="5dp"
         android:layout_marginBottom="5dp"
         android:text="Path: "
-        android:textColor="#54c242"
+        android:textColor="@color/green"
         android:textSize="18sp" />
 
     <!--    <LinearLayout-->
@@ -121,20 +113,22 @@
         android:id="@+id/textView_Size"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
+        android:layout_gravity="center"
         android:layout_marginTop="5dp"
         android:layout_marginBottom="5dp"
         android:text="Size: "
-        android:textColor="#54c242"
+        android:textColor="@color/white"
         android:textSize="18sp" />
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center|center_horizontal|center_vertical"
         android:orientation="horizontal">
 
         <RadioGroup
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
@@ -168,17 +162,19 @@
             android:id="@+id/textView_Material"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="46dp"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
             android:text="Material:"
-            android:textColor="#54c242"
+            android:textColor="@color/white"
             android:textSize="18sp" />
 
         <EditText
             android:id="@+id/etMaterial"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="41dp"
+            android:layout_marginRight="50dp"
             android:imeOptions="actionDone"
             android:textSize="14sp" />
     </LinearLayout>
@@ -192,17 +188,17 @@
             android:id="@+id/textView_NumberOfPeople"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_marginTop="5dp"
+            android:layout_marginLeft="5dp"
             android:layout_marginBottom="5dp"
             android:text="Number Of People:"
-            android:textColor="#54c242"
+            android:textColor="@color/white"
             android:textSize="18sp" />
 
         <EditText
             android:id="@+id/etNumberOfPeople"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginRight="50dp"
             android:ems="10"
             android:inputType="number"
             android:textSize="14sp" />
@@ -217,17 +213,19 @@
             android:id="@+id/textView_Detail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="53dp"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
             android:text="Detail: "
-            android:textColor="#54c242"
+            android:textColor="@color/white"
             android:textSize="18sp" />
 
         <EditText
             android:id="@+id/etCaption"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="49dp"
+            android:layout_marginRight="50dp"
             android:imeOptions="actionDone"
             android:textSize="14sp" />
     </LinearLayout>
@@ -237,13 +235,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:layout_marginTop="30dp"
+        android:background="@color/trans"
         android:minHeight="10dp"
-        android:src="@drawable/btn2" />
+        android:src="@drawable/btn1" />
 
     <TextView
         android:id="@+id/idmax"
-        android:visibility="invisible"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:visibility="invisible" />
 
 </LinearLayout>

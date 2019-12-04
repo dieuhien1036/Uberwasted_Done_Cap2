@@ -5,6 +5,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
+import android.app.Notification;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -78,6 +79,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     String userGender  = null;
     String url = "http://192.168.1.10/androidwebservice/wasteLocation.php";
 
+    public String add;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -148,6 +151,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 intent.putExtra("wasteLocation_address",addressWaste);
 
                 startActivity(intent);
+
+
 
             }
         });
@@ -375,7 +380,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     bundle.putString("phoneNumber",phoneNumber);
                     bundle.putString("job",userJob);
                     bundle.putString("gender",userGender);
-
+                    add=address;
                     RequestQueue requestQueue = Volley.newRequestQueue(MapsActivity.this);
                     JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
                         @Override

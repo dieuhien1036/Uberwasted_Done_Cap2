@@ -55,6 +55,7 @@ public class joinDialog extends BottomSheetDialogFragment implements DirectionFi
     private Button btn_join;
     private TextView txt_size;
     private TextView txt_people;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
