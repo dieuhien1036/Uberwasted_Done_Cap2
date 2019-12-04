@@ -65,6 +65,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,6 +91,7 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
     private EditText etNumberOfPeople;
     private double latitude, longtitude;
     private String addressWaste;
+    private Date date;
 
 
     @Override
@@ -183,6 +185,9 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
 
 
     public void uploadMultipart() {
+        long millis=System.currentTimeMillis();
+        java.sql.Date date=new java.sql.Date(millis);
+        //System.out.println(date);
         Intent intent=getIntent();
         latitude=intent.getDoubleExtra("wasteLocation_latitude",0.);
         longtitude=intent.getDoubleExtra("wasteLocation_longtitude",0.);
@@ -218,6 +223,7 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
                     .addParameter("wasteLocation_longtitude", String.valueOf(longtitude))
                     .addParameter("wasteLocation_latitude", String.valueOf(latitude))
                     .addParameter("wasteLocation_address", String.valueOf(addressWaste))
+                    .addParameter("datereport", String.valueOf(date))
                     .setNotificationConfig(new UploadNotificationConfig())
                     .setMaxRetries(2)
                     .startUpload(); //Starting the upload
