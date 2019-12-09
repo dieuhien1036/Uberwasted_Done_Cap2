@@ -29,17 +29,25 @@ import org.json.JSONObject;
 
 public class LoginActivity extends AppCompatActivity {
 
+    Button btn_account;
     EditText edt_Email;
     EditText edt_Pass;
     ImageButton bnt_Login;
     LinearLayout linearLayout;
-    String url = "http://192.168.1.10/androidwebservice/login.php";
+    String url = "http://10.5.243.89/androidwebservice/login.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_activity);
         AnhXa();
+        btn_account.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(LoginActivity.this,Register.class);
+                startActivity(intent);
+            }
+        });
         bnt_Login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -120,5 +128,6 @@ public class LoginActivity extends AppCompatActivity {
         edt_Pass = (EditText) findViewById(R.id.edtPass);
         bnt_Login = (ImageButton) findViewById(R.id.btn_Login);
         linearLayout = (LinearLayout) findViewById(R.id.linear);
+        btn_account=findViewById(R.id.btn_account);
     }
 }

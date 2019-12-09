@@ -31,7 +31,7 @@ public class Register extends AppCompatActivity {
     private EditText firstname, lastname, email, password, confirmPassword;
     private ImageButton imageButton_register;
     private RequestQueue requestQueue;
-    private static final String URL = "http://192.168.1.10/test/user_control.php";
+    private static final String URL = "http://10.5.243.89/register/register.php";
     private StringRequest request;
 
     private static final Pattern PASSWORD_PATTERN =
@@ -60,10 +60,9 @@ public class Register extends AppCompatActivity {
         imageButton_register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //checkRegister();
-                Intent intent = new Intent(Register.this, LoginActivity.class);
-
-                startActivity(intent);
+                checkRegister();
+                //Intent intent = new Intent(Register.this, LoginActivity.class);
+                //startActivity(intent);
 
             }
         });
