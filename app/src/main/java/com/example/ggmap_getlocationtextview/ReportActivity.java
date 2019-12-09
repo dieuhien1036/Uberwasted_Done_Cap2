@@ -166,6 +166,8 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
 
 
     public void uploadMultipart() {
+        long millis=System.currentTimeMillis();
+        java.sql.Date date=new java.sql.Date(millis);
         Intent intent=getIntent();
         latitude=intent.getDoubleExtra("wasteLocation_latitude",0.);
         longtitude=intent.getDoubleExtra("wasteLocation_longtitude",0.);
@@ -200,6 +202,7 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
                     .addParameter("wasteLocation_longtitude", String.valueOf(longtitude))
                     .addParameter("wasteLocation_latitude", String.valueOf(latitude))
                     .addParameter("wasteLocation_address", String.valueOf(addressWaste))
+                    .addParameter("waste_date", String.valueOf(date))
                     .setNotificationConfig(new UploadNotificationConfig())
                     .setMaxRetries(2)
                     .startUpload(); //Starting the upload
