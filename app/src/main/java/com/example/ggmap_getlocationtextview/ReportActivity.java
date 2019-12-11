@@ -35,16 +35,20 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import net.gotev.uploadservice.MultipartUploadRequest;
 import net.gotev.uploadservice.UploadNotificationConfig;
@@ -69,9 +73,11 @@ import java.util.UUID;
 
 import static com.google.android.gms.tasks.Tasks.whenAllSuccess;
 
-public class ReportActivity extends AppCompatActivity implements View.OnClickListener {
+public class ReportActivity extends AppCompatActivity
+//       implements View.OnClickListener
+{
     private static String JSON_STRING;
-    private static final String UPLOAD_URL = "http://10.5.243.89/upload/insert_image.php";
+    private static final String UPLOAD_URL = "http://192.168.1.13/upload/insert_image.php";
     private static final int IMAGE_REQUEST_CODE = 3;
     private static final int STORAGE_PERMISSION_CODE = 123;
     private ImageView imageView;
@@ -96,8 +102,24 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
         reflect();
         requestStoragePermission();
 
-        imageView.setOnClickListener(this);
-        btnReport.setOnClickListener(this);
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(intent, "Complete action using"), IMAGE_REQUEST_CODE);
+            }
+        });
+        btnReport.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //sendFCMPush();
+                uploadMultipart();
+                sendFCMPush();
+
+            }
+        });
 
     }
     private void reflect(){
@@ -113,17 +135,19 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
         btnReport=findViewById((R.id.btnReport));
         tvIdmax = findViewById(R.id.idmax);
     }
-    @Override
-    public void onClick(View view) {
-        if (view == imageView) {
-            Intent intent = new Intent();
-            intent.setType("image/*");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(Intent.createChooser(intent, "Complete action using"), IMAGE_REQUEST_CODE);
-        } else if (view == btnReport) {
-            uploadMultipart();
-        }
-    }
+//    @Override
+//    public void onClick(View view) {
+//        sendFCMPush();
+//        if (view == imageView) {
+//            Intent intent = new Intent();
+//            intent.setType("image/*");
+//            intent.setAction(Intent.ACTION_GET_CONTENT);
+//            startActivityForResult(Intent.createChooser(intent, "Complete action using"), IMAGE_REQUEST_CODE);
+//        } else if (view == btnReport) {
+//            uploadMultipart();
+//
+//        }
+//    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -143,7 +167,7 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     public void uploadMultipart1() {
-        String url = "http://10.5.243.89/upload/insert_image1.php";
+        String url = "http://192.168.1.13/upload/insert_image1.php";
 
         String caption = etCaption.getText().toString().trim();
         //String size=etSize.getText().toString().trim();
@@ -310,7 +334,7 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
 
         @Override
         protected void onPreExecute() {
-            url = "http://10.5.243.89/upload/getPeople.php";
+            url = "http://192.168.1.13/upload/getPeople.php";
         }
 
         @Override
@@ -356,7 +380,7 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
 
         @Override
         protected void onPreExecute() {
-            url = "http://10.5.243.89/upload/getMaterial.php";
+            url = "http://192.168.1.13/upload/getMaterial.php";
         }
 
         @Override
@@ -402,7 +426,7 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
 
         @Override
         protected void onPreExecute() {
-            url = "http://10.5.243.89/upload/getSize.php";
+            url = "http://192.168.1.13/upload/getSize.php";
         }
 
         @Override
@@ -505,6 +529,71 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
                 mDelegate.onCancelled();
             }
         }
+    }
+    private void sendFCMPush() {
+        MapsActivity m=new MapsActivity();
+        final String SERVER_KEY = "AAAA5X8ZDBE:APA91bHDkSbJW0In5hLU_8mOwP9zhNuD_E3WzYi8-0W0UT_rAdIPy3HrmaxNlP__KjmipMjaaJ08AqQeB591ynOeMEKj2k31e-bm1y1jFUq_HvhonynWJkJVEjoR6DojXts2MTtM_AQB";
+        Log.e("cccccc",String.valueOf(addressWaste));
+        String title = "Uber";
+        String msg = "Have new waste near " + String.valueOf(addressWaste);
+        String token = "epcG9vI67-E:APA91bFZH6i48Tm_6i2Ykf30JmHFjP0_rcv2Emqyc0ekk8GXTV4LtSc8DgxsjMrPJCJLnBqQBqRbGEzY7CuNYmIUwVgS1A0uTRUJgFRp_3O3-mYpYy4L4LaVGQi1XTVv1leadOuhEFJc";
+
+        JSONObject obj = null;
+        JSONObject objData = null;
+        JSONObject dataobjData = null;
+
+        try {
+            obj = new JSONObject();
+            objData = new JSONObject();
+
+            objData.put("body", msg);
+            objData.put("title", title);
+            objData.put("sound", "default");
+            objData.put("icon", "icon_name"); //   icon_name
+            objData.put("tag", "/topics/allDevices");
+            objData.put("priority", "high");
+
+            dataobjData = new JSONObject();
+            dataobjData.put("text", msg);
+            dataobjData.put("title", title);
+
+            obj.put("to", "/topics/allDevices");
+            //obj.put("priority", "high");
+
+            obj.put("notification", objData);
+            obj.put("data", dataobjData);
+            Log.e("return here>>", obj.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.POST, "https://fcm.googleapis.com/fcm/send", obj,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.e("True", response + "");
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("False", error + "");
+                    }
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("Authorization", "key=" + SERVER_KEY);
+                params.put("Content-Type", "application/json");
+                return params;
+            }
+        };
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        int socketTimeout = 1000 * 60;// 60 seconds
+        RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        jsObjRequest.setRetryPolicy(policy);
+        requestQueue.add(jsObjRequest);
+        FirebaseMessaging.getInstance().subscribeToTopic("allDevices");
     }
 
 }
