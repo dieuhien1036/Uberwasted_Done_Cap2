@@ -77,7 +77,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     String phoneNumber = null;
     String userJob = null;
     String userGender  = null;
-    String url = "http://192.168.1.13/androidwebservice/wasteLocation.php";
+    String url = "http://192.168.1.6/androidwebservice/wasteLocation.php";
 
     public String add;
 
