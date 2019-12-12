@@ -20,6 +20,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -65,7 +66,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,25 +73,25 @@ import java.util.UUID;
 
 import static com.google.android.gms.tasks.Tasks.whenAllSuccess;
 
-public class ReportActivity extends AppCompatActivity implements View.OnClickListener {
-    private static String id = "a";
+public class ReportActivity extends AppCompatActivity
+//       implements View.OnClickListener
+{
     private static String JSON_STRING;
     private static final String UPLOAD_URL = "http://192.168.1.6/upload/insert_image.php";
     private static final int IMAGE_REQUEST_CODE = 3;
     private static final int STORAGE_PERMISSION_CODE = 123;
     private ImageView imageView;
+    private String size;
     private EditText etCaption;
     private TextView tvPath,tvIdmax;
     private ImageButton btnReport;
     private Bitmap bitmap;
     private Uri filePath;
     private RadioButton radioButton_Small, radioButton_Medium, radioButton_Large;
-    private String size = "";
     private EditText etMaterial;
     private EditText etNumberOfPeople;
     private double latitude, longtitude;
     private String addressWaste;
-    private Date date;
 
 
     @Override
@@ -102,8 +102,25 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
         reflect();
         requestStoragePermission();
 
-        imageView.setOnClickListener(this);
-        btnReport.setOnClickListener(this);
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendFCMPush();
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(intent, "Complete action using"), IMAGE_REQUEST_CODE);
+            }
+        });
+        btnReport.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //sendFCMPush();
+                uploadMultipart();
+                sendFCMPush();
+
+            }
+        });
 
     }
     private void reflect(){
@@ -119,43 +136,31 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
         btnReport=findViewById((R.id.btnReport));
         tvIdmax = findViewById(R.id.idmax);
     }
-    @Override
-    public void onClick(View view) {
-        if (view == imageView) {
-            Intent intent = new Intent();
-            intent.setType("image/*");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(Intent.createChooser(intent, "Complete action using"), IMAGE_REQUEST_CODE);
-            sendFCMPush();
-        } else if (view == btnReport) {
-            uploadMultipart();
-        }
-
-        sendFCMPush();
-    }
-
+    //    @Override
+//    public void onClick(View view) {
+//        sendFCMPush();
+//        if (view == imageView) {
+//            Intent intent = new Intent();
+//            intent.setType("image/*");
+//            intent.setAction(Intent.ACTION_GET_CONTENT);
+//            startActivityForResult(Intent.createChooser(intent, "Complete action using"), IMAGE_REQUEST_CODE);
+//        } else if (view == btnReport) {
+//            uploadMultipart();
+//
+//        }
+//    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == IMAGE_REQUEST_CODE && resultCode == RESULT_OK && data != null && data.getData() != null) {
             filePath = data.getData();
-            uploadMultipart1();
             try {
                 bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
                 tvPath.setText("Path: ".concat(getPath(filePath)));
                 imageView.setImageBitmap(bitmap);
                 //XU LY TAI DAY
                 uploadMultipart1();
-                //HIEN THI NHANH QUA
                 Toast.makeText(this, "Loading recommend please wait...", Toast.LENGTH_SHORT).show();
-                Handler h = new Handler();
-                h.postDelayed(new Runnable() {
-                    public void run() {
-                        getPeople();
-                        getSize();
-                        getMaterial();
-                    }
-                }, 8000);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -188,7 +193,6 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
     public void uploadMultipart() {
         long millis=System.currentTimeMillis();
         java.sql.Date date=new java.sql.Date(millis);
-        //System.out.println(date);
         Intent intent=getIntent();
         latitude=intent.getDoubleExtra("wasteLocation_latitude",0.);
         longtitude=intent.getDoubleExtra("wasteLocation_longtitude",0.);
@@ -213,7 +217,6 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
         //Uploading code
         try {
             String uploadId = UUID.randomUUID().toString();
-
             //Creating a multi part request
             new MultipartUploadRequest(this, uploadId, UPLOAD_URL)
                     .addFileToUpload(path, "image") //Adding file
@@ -224,10 +227,14 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
                     .addParameter("wasteLocation_longtitude", String.valueOf(longtitude))
                     .addParameter("wasteLocation_latitude", String.valueOf(latitude))
                     .addParameter("wasteLocation_address", String.valueOf(addressWaste))
-                    .addParameter("datereport", String.valueOf(date))
+                    .addParameter("waste_date", String.valueOf(date))
                     .setNotificationConfig(new UploadNotificationConfig())
                     .setMaxRetries(2)
                     .startUpload(); //Starting the upload
+            Intent intentBackMap=new Intent(ReportActivity.this, MapsActivity.class);
+            startActivity(intentBackMap);
+            finish();
+            startActivity(intentBackMap);
             Toast.makeText(this, "Upload Successful", Toast.LENGTH_SHORT).show();
         } catch (Exception exc) {
             Toast.makeText(this, exc.getMessage(), Toast.LENGTH_SHORT).show();
@@ -239,7 +246,9 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
         @Override
         public void onCompleted(String uploadId, int serverResponseCode, byte[] serverResponseBody) {
             super.onCompleted(uploadId, serverResponseCode, serverResponseBody);
-
+            getPeople();
+            getSize();
+            getMaterial();
             //Intent intentBackMap=new Intent(ReportActivity.this, MapsActivity.class);
             //startActivity(intentBackMap);
         }
@@ -306,10 +315,6 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
 
     }
 
-    public void getId()
-    {
-        new docId().execute();
-    }
     public void getPeople()
     {
         new docSoNguoi().execute();
@@ -367,52 +372,6 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
         @Override
         protected void onPostExecute(String result) {
             etNumberOfPeople.setText(result);
-        }
-    }
-
-    public class docId extends AsyncTask<Void, Void, String>{
-
-        String url;
-
-        @Override
-        protected void onPreExecute() {
-            url = "http://192.168.1.6/upload/Count.txt";
-        }
-
-        @Override
-        protected String doInBackground(Void... voids) {
-            try{
-                URL url1 = new URL(url);
-                HttpURLConnection httpURLConnection = (HttpURLConnection)url1.openConnection();
-                InputStream inputStream = httpURLConnection.getInputStream();
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                StringBuilder stringBuilder = new StringBuilder();
-                while((JSON_STRING = bufferedReader.readLine())!= null)
-                {
-                    stringBuilder.append(JSON_STRING+"\n");
-                }
-                bufferedReader.close();
-                inputStream.close();
-                httpURLConnection.disconnect();
-                return stringBuilder.toString().trim();
-            }
-            catch (MalformedURLException e){
-                e.printStackTrace();
-            }
-            catch (IOException e){
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onProgressUpdate(Void... values) {
-            super.onProgressUpdate(values);
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            tvIdmax.setText(result);
         }
     }
 
@@ -515,6 +474,7 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
             }
         }
     }
+
     public static class SingleUploadBroadcastReceiver extends UploadServiceBroadcastReceiver {
 
         public interface Delegate {
@@ -572,9 +532,11 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
         }
     }
     private void sendFCMPush() {
+        MapsActivity m=new MapsActivity();
         final String SERVER_KEY = "AAAA5X8ZDBE:APA91bHDkSbJW0In5hLU_8mOwP9zhNuD_E3WzYi8-0W0UT_rAdIPy3HrmaxNlP__KjmipMjaaJ08AqQeB591ynOeMEKj2k31e-bm1y1jFUq_HvhonynWJkJVEjoR6DojXts2MTtM_AQB";
-        String msg = "Khánh đẹp trai vl";
-        String title = "UberWasted";
+        Log.e("cccccc",String.valueOf(addressWaste));
+        String title = "Uber";
+        String msg = "Have new waste near " + String.valueOf(addressWaste);
         String token = "epcG9vI67-E:APA91bFZH6i48Tm_6i2Ykf30JmHFjP0_rcv2Emqyc0ekk8GXTV4LtSc8DgxsjMrPJCJLnBqQBqRbGEzY7CuNYmIUwVgS1A0uTRUJgFRp_3O3-mYpYy4L4LaVGQi1XTVv1leadOuhEFJc";
 
         JSONObject obj = null;
