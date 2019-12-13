@@ -34,7 +34,7 @@ public class LoginActivity extends AppCompatActivity {
     EditText edt_Pass;
     ImageButton bnt_Login;
     LinearLayout linearLayout;
-    String url = "http://192.168.1.6/androidwebservice/login.php";
+    String url = "http://192.168.1.9/androidwebservice/login.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

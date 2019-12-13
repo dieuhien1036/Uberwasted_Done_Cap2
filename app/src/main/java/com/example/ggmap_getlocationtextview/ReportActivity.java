@@ -77,13 +77,13 @@ public class ReportActivity extends AppCompatActivity
 //       implements View.OnClickListener
 {
     private static String JSON_STRING;
-    private static final String UPLOAD_URL = "http://192.168.1.6/upload/insert_image.php";
+    private static final String UPLOAD_URL = "http://192.168.1.9/upload/insert_image.php";
     private static final int IMAGE_REQUEST_CODE = 3;
     private static final int STORAGE_PERMISSION_CODE = 123;
     private ImageView imageView;
     private String size;
     private EditText etCaption;
-    private TextView tvPath,tvIdmax;
+    private TextView tvPath, tvIdmax;
     private ImageButton btnReport;
     private Bitmap bitmap;
     private Uri filePath;
@@ -105,25 +105,26 @@ public class ReportActivity extends AppCompatActivity
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendFCMPush();
                 Intent intent = new Intent();
                 intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
                 startActivityForResult(Intent.createChooser(intent, "Complete action using"), IMAGE_REQUEST_CODE);
+                sendFCMPush();
             }
         });
+        sendFCMPush();
         btnReport.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //sendFCMPush();
-                uploadMultipart();
                 sendFCMPush();
+                uploadMultipart();
 
             }
         });
 
     }
-    private void reflect(){
+
+    private void reflect() {
         //id = tvIdmax.getText().toString();
         imageView = (ImageView) findViewById(R.id.image);
         etCaption = (EditText) findViewById(R.id.etCaption);
@@ -133,9 +134,10 @@ public class ReportActivity extends AppCompatActivity
         radioButton_Small = findViewById(R.id.radioButton_Small);
         radioButton_Medium = findViewById(R.id.radioButton_Medium);
         radioButton_Large = findViewById(R.id.radioButton_Large);
-        btnReport=findViewById((R.id.btnReport));
+        btnReport = findViewById((R.id.btnReport));
         tvIdmax = findViewById(R.id.idmax);
     }
+
     //    @Override
 //    public void onClick(View view) {
 //        sendFCMPush();
@@ -168,12 +170,16 @@ public class ReportActivity extends AppCompatActivity
     }
 
     public void uploadMultipart1() {
-        String url = "http://192.168.1.6/upload/insert_image1.php";
+        String url = "http://192.168.1.9/upload/insert_image1.php";
 
         String caption = etCaption.getText().toString().trim();
         //String size=etSize.getText().toString().trim();
         //getting the actual path of the image
         String path = getPath(filePath);
+        Intent intent = getIntent();
+        latitude = intent.getDoubleExtra("wasteLocation_latitude", 0.);
+        longtitude = intent.getDoubleExtra("wasteLocation_longtitude", 0.);
+        addressWaste = intent.getStringExtra("wasteLocation_address");
         //Uploading code
         try {
             String uploadId = UUID.randomUUID().toString();
@@ -181,6 +187,9 @@ public class ReportActivity extends AppCompatActivity
             new MultipartUploadRequest(this, uploadId, url)
                     .addFileToUpload(path, "image") //Adding file
                     .addParameter("caption", caption) //Adding text parameter to the request
+                    .addParameter("wasteLocation_longtitude", String.valueOf(longtitude))
+                    .addParameter("wasteLocation_latitude", String.valueOf(latitude))
+                    .addParameter("wasteLocation_address", String.valueOf(addressWaste))
                     .setNotificationConfig(new UploadNotificationConfig())
                     .setMaxRetries(2)
                     .startUpload(); //Starting the upload
@@ -191,11 +200,11 @@ public class ReportActivity extends AppCompatActivity
 
 
     public void uploadMultipart() {
-        long millis=System.currentTimeMillis();
-        java.sql.Date date=new java.sql.Date(millis);
-        Intent intent=getIntent();
-        latitude=intent.getDoubleExtra("wasteLocation_latitude",0.);
-        longtitude=intent.getDoubleExtra("wasteLocation_longtitude",0.);
+        long millis = System.currentTimeMillis();
+        java.sql.Date date = new java.sql.Date(millis);
+        Intent intent = getIntent();
+        latitude = intent.getDoubleExtra("wasteLocation_latitude", 0.);
+        longtitude = intent.getDoubleExtra("wasteLocation_longtitude", 0.);
         addressWaste = intent.getStringExtra("wasteLocation_address");
 
         if (radioButton_Small.isChecked()) {
@@ -231,7 +240,7 @@ public class ReportActivity extends AppCompatActivity
                     .setNotificationConfig(new UploadNotificationConfig())
                     .setMaxRetries(2)
                     .startUpload(); //Starting the upload
-            Intent intentBackMap=new Intent(ReportActivity.this, MapsActivity.class);
+            Intent intentBackMap = new Intent(ReportActivity.this, MapsActivity.class);
             startActivity(intentBackMap);
             finish();
             startActivity(intentBackMap);
@@ -242,7 +251,7 @@ public class ReportActivity extends AppCompatActivity
     }
 
 
-    private UploadServiceBroadcastReceiver receiver = new UploadServiceBroadcastReceiver(){
+    private UploadServiceBroadcastReceiver receiver = new UploadServiceBroadcastReceiver() {
         @Override
         public void onCompleted(String uploadId, int serverResponseCode, byte[] serverResponseBody) {
             super.onCompleted(uploadId, serverResponseCode, serverResponseBody);
@@ -315,50 +324,46 @@ public class ReportActivity extends AppCompatActivity
 
     }
 
-    public void getPeople()
-    {
+    public void getPeople() {
         new docSoNguoi().execute();
     }
-    public void getMaterial()
-    {
+
+    public void getMaterial() {
         new docChatLieu().execute();
     }
-    public void getSize()
-    {
+
+    public void getSize() {
         new docSize().execute();
     }
 
 
-    public class docSoNguoi extends AsyncTask<Void, Void, String>{
+    public class docSoNguoi extends AsyncTask<Void, Void, String> {
 
         String url;
 
         @Override
         protected void onPreExecute() {
-            url = "http://192.168.1.6/upload/getPeople.php";
+            url = "http://192.168.1.9/upload/getPeople.php";
         }
 
         @Override
         protected String doInBackground(Void... voids) {
-            try{
+            try {
                 URL url1 = new URL(url);
-                HttpURLConnection httpURLConnection = (HttpURLConnection)url1.openConnection();
+                HttpURLConnection httpURLConnection = (HttpURLConnection) url1.openConnection();
                 InputStream inputStream = httpURLConnection.getInputStream();
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
                 StringBuilder stringBuilder = new StringBuilder();
-                while((JSON_STRING = bufferedReader.readLine())!= null)
-                {
-                    stringBuilder.append(JSON_STRING+"\n");
+                while ((JSON_STRING = bufferedReader.readLine()) != null) {
+                    stringBuilder.append(JSON_STRING + "\n");
                 }
                 bufferedReader.close();
                 inputStream.close();
                 httpURLConnection.disconnect();
                 return stringBuilder.toString().trim();
-            }
-            catch (MalformedURLException e){
+            } catch (MalformedURLException e) {
                 e.printStackTrace();
-            }
-            catch (IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
             }
             return null;
@@ -375,36 +380,33 @@ public class ReportActivity extends AppCompatActivity
         }
     }
 
-    public class docChatLieu extends AsyncTask<Void, Void, String>{
+    public class docChatLieu extends AsyncTask<Void, Void, String> {
 
         String url;
 
         @Override
         protected void onPreExecute() {
-            url = "http://192.168.1.6/upload/getMaterial.php";
+            url = "http://192.168.1.9/upload/getMaterial.php";
         }
 
         @Override
         protected String doInBackground(Void... voids) {
-            try{
+            try {
                 URL url1 = new URL(url);
-                HttpURLConnection httpURLConnection = (HttpURLConnection)url1.openConnection();
+                HttpURLConnection httpURLConnection = (HttpURLConnection) url1.openConnection();
                 InputStream inputStream = httpURLConnection.getInputStream();
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
                 StringBuilder stringBuilder = new StringBuilder();
-                while((JSON_STRING = bufferedReader.readLine())!= null)
-                {
-                    stringBuilder.append(JSON_STRING+"\n");
+                while ((JSON_STRING = bufferedReader.readLine()) != null) {
+                    stringBuilder.append(JSON_STRING + "\n");
                 }
                 bufferedReader.close();
                 inputStream.close();
                 httpURLConnection.disconnect();
                 return stringBuilder.toString().trim();
-            }
-            catch (MalformedURLException e){
+            } catch (MalformedURLException e) {
                 e.printStackTrace();
-            }
-            catch (IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
             }
             return null;
@@ -421,36 +423,33 @@ public class ReportActivity extends AppCompatActivity
         }
     }
 
-    public class docSize extends AsyncTask<Void, Void, String>{
+    public class docSize extends AsyncTask<Void, Void, String> {
 
         String url;
 
         @Override
         protected void onPreExecute() {
-            url = "http://192.168.1.6/upload/getSize.php";
+            url = "http://192.168.1.9/upload/getSize.php";
         }
 
         @Override
         protected String doInBackground(Void... voids) {
-            try{
+            try {
                 URL url1 = new URL(url);
-                HttpURLConnection httpURLConnection = (HttpURLConnection)url1.openConnection();
+                HttpURLConnection httpURLConnection = (HttpURLConnection) url1.openConnection();
                 InputStream inputStream = httpURLConnection.getInputStream();
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
                 StringBuilder stringBuilder = new StringBuilder();
-                while((JSON_STRING = bufferedReader.readLine())!= null)
-                {
-                    stringBuilder.append(JSON_STRING+"\n");
+                while ((JSON_STRING = bufferedReader.readLine()) != null) {
+                    stringBuilder.append(JSON_STRING + "\n");
                 }
                 bufferedReader.close();
                 inputStream.close();
                 httpURLConnection.disconnect();
                 return stringBuilder.toString().trim();
-            }
-            catch (MalformedURLException e){
+            } catch (MalformedURLException e) {
                 e.printStackTrace();
-            }
-            catch (IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
             }
             return null;
@@ -479,9 +478,13 @@ public class ReportActivity extends AppCompatActivity
 
         public interface Delegate {
             void onProgress(int progress);
+
             void onProgress(long uploadedBytes, long totalBytes);
+
             void onError(Exception exception);
+
             void onCompleted(int serverResponseCode, byte[] serverResponseBody);
+
             void onCancelled();
         }
 
@@ -531,10 +534,16 @@ public class ReportActivity extends AppCompatActivity
             }
         }
     }
+
     private void sendFCMPush() {
-        MapsActivity m=new MapsActivity();
+
+        Intent intent = getIntent();
+        latitude = intent.getDoubleExtra("wasteLocation_latitude", 0.);
+        longtitude = intent.getDoubleExtra("wasteLocation_longtitude", 0.);
+        addressWaste = intent.getStringExtra("wasteLocation_address");
+        MapsActivity m = new MapsActivity();
         final String SERVER_KEY = "AAAA5X8ZDBE:APA91bHDkSbJW0In5hLU_8mOwP9zhNuD_E3WzYi8-0W0UT_rAdIPy3HrmaxNlP__KjmipMjaaJ08AqQeB591ynOeMEKj2k31e-bm1y1jFUq_HvhonynWJkJVEjoR6DojXts2MTtM_AQB";
-        Log.e("cccccc",String.valueOf(addressWaste));
+        Log.e("cccccc", String.valueOf(addressWaste));
         String title = "Uber";
         String msg = "Have new waste near " + String.valueOf(addressWaste);
         String token = "epcG9vI67-E:APA91bFZH6i48Tm_6i2Ykf30JmHFjP0_rcv2Emqyc0ekk8GXTV4LtSc8DgxsjMrPJCJLnBqQBqRbGEzY7CuNYmIUwVgS1A0uTRUJgFRp_3O3-mYpYy4L4LaVGQi1XTVv1leadOuhEFJc";

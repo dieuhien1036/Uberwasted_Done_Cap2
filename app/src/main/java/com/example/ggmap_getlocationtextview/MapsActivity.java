@@ -77,7 +77,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     String phoneNumber = null;
     String userJob = null;
     String userGender  = null;
-    String url = "http://192.168.1.6/androidwebservice/wasteLocation.php";
+    String url = "http://192.168.1.9/androidwebservice/wasteLocation.php";
 
     public String add;
 
@@ -242,8 +242,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     try {
                         JSONObject object = response.getJSONObject(i);
 
-                            double wasteLocation_latitude = Double.parseDouble(object.getString("wasteLocation_latitude"));
-                            double wasteLocation_longtitude = Double.parseDouble(object.getString("wasteLocation_longtitude"));
+                            double wasteLocation_latitude = Double.parseDouble(object.getString("waste_latitute"));
+                            double wasteLocation_longtitude = Double.parseDouble(object.getString("waste_longtitude"));
                             LatLng latLng = new LatLng(wasteLocation_latitude, wasteLocation_longtitude);
                             Geocoder geocoder = new Geocoder(getApplicationContext());
                             try {
@@ -389,15 +389,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 try {
                                     JSONObject object = response.getJSONObject(i);
 
-                                    double wasteLocation_latitude = Double.parseDouble(object.getString("wasteLocation_latitude"));
-                                    double wasteLocation_longtitude = Double.parseDouble(object.getString("wasteLocation_longtitude"));
+                                    double wasteLocation_latitude = Double.parseDouble(object.getString("waste_latitute"));
+                                    double wasteLocation_longtitude = Double.parseDouble(object.getString("waste_longtitude"));
                                     if(wasteLocation_latitude == m.getPosition().latitude && wasteLocation_longtitude == m.getPosition().longitude){
-                                        String numberOfPeople = object.getString("people");
-                                        String size = object.getString("size");
-                                        String image_name = object.getString("image_name");
-                                        bundle.putString("people", numberOfPeople);
-                                        bundle.putString("size", size);
-                                        bundle.putString("image_name",image_name);
+                                        String numberOfPeople = object.getString("waste_people");
+                                        String size = object.getString("waste_size");
+                                        String image_name = object.getString("waste_image");
+                                        bundle.putString("waste_people", numberOfPeople);
+                                        bundle.putString("waste_size", size);
+                                        bundle.putString("waste_image",image_name);
 
                                         joinDialog dialog = new joinDialog();
                                         dialog.setArguments(bundle);

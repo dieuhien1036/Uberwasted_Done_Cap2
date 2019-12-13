@@ -63,7 +63,7 @@ public class joinDialog extends BottomSheetDialogFragment implements DirectionFi
 //        Bundle bundle = getArguments();
 //        String str = bundle.getString("key","");
 
-        //getData("http://192.168.1.6/upload/uploads/1.jpg");
+        //getData("http://192.168.1.9/upload/uploads/1.jpg");
         return v;
 
     }
@@ -83,7 +83,7 @@ public class joinDialog extends BottomSheetDialogFragment implements DirectionFi
         final String phoneNumber = getArguments().getString("phoneNumber");
         final String userJob = getArguments().getString("job");
         final String userGender = getArguments().getString("gender");
-        final String image_name = getArguments().getString("image_name").trim();
+        final String image_name = getArguments().getString("waste_image").trim();
 
         currentLatitude = getArguments().getDouble("currentLatitude",0);
         currentLongtitude = getArguments().getDouble("currentLongtitude",0);
@@ -98,7 +98,7 @@ public class joinDialog extends BottomSheetDialogFragment implements DirectionFi
         txt_size.setText(size);
 
         //Load image của this waste vào dialog
-        final String image_url = "http://192.168.1.13/upload/uploads/" + image_name;
+        final String image_url = "http://192.168.1.9/upload/uploads/" + image_name;
         new LoadImages().execute(image_url);
 
         btn_join.setOnClickListener(new View.OnClickListener() {
