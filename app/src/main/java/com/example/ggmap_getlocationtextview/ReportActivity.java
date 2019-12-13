@@ -111,8 +111,9 @@ public class ReportActivity extends AppCompatActivity
                 startActivityForResult(Intent.createChooser(intent, "Complete action using"), IMAGE_REQUEST_CODE);
                 sendFCMPush();
             }
-        });
-        sendFCMPush();
+        }
+        );
+
         btnReport.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -558,9 +559,9 @@ public class ReportActivity extends AppCompatActivity
 
             objData.put("body", msg);
             objData.put("title", title);
-            objData.put("sound", "default");
-            objData.put("icon", "icon_name"); //   icon_name
-            objData.put("tag", "/topics/allDevices");
+            //objData.put("sound", "default");
+            //objData.put("icon", "icon_name"); //   icon_name
+            //objData.put("tag", "/topics/allDevices");
             objData.put("priority", "high");
 
             dataobjData = new JSONObject();
