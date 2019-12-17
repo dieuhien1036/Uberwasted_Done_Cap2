@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:background="@color/green"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Ranking"
+    android:orientation="vertical">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ranking"
+        android:layout_gravity="center"
+        android:textStyle="bold"
+        android:textSize="50dp"
+        android:textColor="@color/white"
+        />
+
+    <ImageView
+        android:src="@drawable/ic_trophy"
+        android:layout_margin="20dp"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_gravity="center"
+        />
+
+    <ListView
+        android:id="@+id/listviewUser"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_margin="0dp" />
+</LinearLayout>

@@ -1,85 +1,147 @@
 package com.example.ggmap_getlocationtextview;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Paint;
-import android.media.Image;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class JoinActivity extends AppCompatActivity {
-    TextView txt_address;
-    TextView txt_people;
-    TextView txt_size;
-    TextView txt_user;
-    TextView txt_phone;
-    TextView txt_job;
-    ImageView img_wasted;
-    Button btn_join;
-    DirectionFinderListener listener;
-    Double wasteLatitude;
-    Double wasteLongtitude;
+    private TextView txt_address;
+    private TextView txt_people;
+    private TextView txt_size;
+    private TextView txt_user;
+    private TextView txt_job;
+    private Button btn_join;
+    double wasteLatitude;
+    double wasteLongtitude;
+    String userID;
+    int wasteID;
+    String waste_address;
+    String wasteURL = "http://192.168.1.6/androidwebservice/wasteLocation.php";
+    String insertJoinURL ="http://192.168.1.6/androidwebservice/insertJoin.php";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_join3);
-
+        getWasteID(wasteURL);
         reflect();
         Bundle bundle = getIntent().getExtras();
-
-        String image_url = bundle.getString("image_url");
         wasteLatitude = bundle.getDouble("wasteLatitude");
         wasteLongtitude = bundle.getDouble("wasteLongtitude");
-
-        new JoinActivity.LoadImages().execute(image_url);
+        waste_address = bundle.getString("waste_address");
+        userID = bundle.getString("userID");
 
         if (bundle != null) {
-            if (bundle.getString("address") != null) {
-                txt_address.setText(bundle.getString("address"));
+            if (bundle.getString("waste_address") != null) {
+                txt_address.setText(bundle.getString("waste_address"));
             }
-            if (bundle.getString("people") != null) {
-                txt_people.setText(bundle.getString("people"));
+            if (bundle.getString("waste_people") != null) {
+                txt_people.setText(bundle.getString("waste_people"));
             }
-            if (bundle.getString("size") != null) {
-                txt_size.setText(bundle.getString("size"));
+            if (bundle.getString("waste_size") != null) {
+                txt_size.setText(bundle.getString("waste_size"));
             }
-            if (bundle.getString("job") != null) {
-                txt_job.setText(bundle.getString("job"));
+            if (bundle.getString("userJob") != null) {
+                txt_job.setText(bundle.getString("userJob"));
             }
             if (bundle.getString("username") != null) {
                 txt_user.setText(bundle.getString("username"));
             }
-            if (bundle.getString("phoneNumber") != null) {
-                txt_phone.setText(bundle.getString("phoneNumber"));
-            }
         }
+        joinData();
+    }
 
+
+    public void joinData() {
         btn_join.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.e("JoinButton-a","Vào đây1");
-                listener.changeColorJoinMaker(wasteLatitude, wasteLongtitude);
+                Intent data = new Intent();
+                data.putExtra("wasteLat",wasteLatitude);
+                data.putExtra("wasteLong",wasteLongtitude);
+                data.putExtra("wasteAddress",waste_address);
+                data.putExtra("userID",userID);
+                data.putExtra("wasteID",wasteID);
+                insertData(insertJoinURL);
+                setResult(RESULT_OK,data);
+                finish();
             }
         });
+    }
+
+    private void getWasteID(String url){
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                for (int i = 0; i < response.length(); i++) {
+                    try {
+                        JSONObject object = response.getJSONObject(i);
+                        double wasteLocation_latitude = Double.parseDouble(object.getString("waste_latitude"));
+                        double wasteLocation_longtitude = Double.parseDouble(object.getString("waste_longtitude"));
+                        if(wasteLatitude == wasteLocation_latitude &&  wasteLongtitude == wasteLocation_longtitude){
+                            wasteID = object.getInt("waste_id");
+                            return;
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+            }
+        });
+        requestQueue.add(jsonArrayRequest);
+    }
+    private void insertData(String insertJoinURL){
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, insertJoinURL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+            }
+        }){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+
+                Date today=new Date(System.currentTimeMillis());
+                SimpleDateFormat timeFormat= new SimpleDateFormat("yyyy-MM-dd");
+                String date = timeFormat.format(today.getTime());
+                Map<String,String> params = new HashMap<>();
+                params.put("waste_id",String.valueOf(wasteID));
+                params.put("volunteer_id",userID);
+                params.put("date",date);
+                return params;
+            }
+        };
+        requestQueue.add(stringRequest);
     }
 
     private void reflect(){
@@ -87,38 +149,7 @@ public class JoinActivity extends AppCompatActivity {
         txt_people = (TextView) findViewById(R.id.txt_people);
         txt_size = (TextView) findViewById(R.id.txt_size);
         txt_job = (TextView) findViewById(R.id.txt_job);
-        txt_phone = (TextView) findViewById(R.id.txt_phone);
         txt_user = (TextView) findViewById(R.id.txt_user);
-        img_wasted = (ImageView) findViewById(R.id.img_wasted);
         btn_join = (Button) findViewById(R.id.btn_join);
-
     }
-    //class doc du lieu anh
-    public class LoadImages extends AsyncTask<String, Void, Bitmap> {
-        Bitmap bitmaphinh;
-        InputStream inputStream = null;
-        @Override
-        protected Bitmap doInBackground(String... strings) {
-            try {
-                URL url = new URL(strings[0]);
-                try {
-                    inputStream = url.openConnection().getInputStream();
-                    bitmaphinh = BitmapFactory.decodeStream(inputStream);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
-            return bitmaphinh;
-        }
-
-        @Override //hien thi anh len imageview
-        protected void onPostExecute(Bitmap bitmap) {
-            super.onPostExecute(bitmap);
-            img_wasted.setImageBitmap(bitmaphinh);
-        }
-
-    }
-
 }

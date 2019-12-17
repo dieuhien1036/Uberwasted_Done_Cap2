@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Checkin"
+    android:background="@color/green"
+    android:orientation="vertical">
+
+
+
+    <ImageView
+        android:background="@color/white"
+        android:src="@drawable/icons8addimage64"
+        android:layout_marginTop="30dp"
+        android:id="@+id/imgeCheckout"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_gravity="center" />
+
+    <TextView
+        android:textSize="20dp"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="36dp"
+        android:layout_marginLeft="36dp"
+        android:layout_marginTop="32dp"
+        android:text="Progress of clean waste" />
+
+    <SeekBar
+        android:id="@+id/sbProcess"
+        android:max="100"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="60dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:textSize="@dimen/sp_20"
+        android:layout_margin="5dp"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/white"
+        android:text="Percent waste clean: "
+        android:id="@+id/txt_process"/>
+
+    <TextView
+        android:layout_marginTop="5dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="36dp"
+        android:layout_marginLeft="36dp"
+        android:text="Information"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        android:textSize="20dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Do you think about percent accurate of this waste?"
+        android:textColor="#FF0404"
+        android:layout_gravity="center"/>
+
+    s
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <CheckBox
+            android:textSize="@dimen/dp_18"
+            android:id="@+id/tb_material"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Material : "
+            android:layout_marginLeft="50dp"
+            android:textColor="@color/white" />
+
+        <TextView
+            android:layout_marginTop="5dp"
+            android:textSize="@dimen/dp_18"
+            android:id="@+id/txtMaterial"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Type of material"
+            android:textColor="@color/white"
+            android:layout_toRightOf="@id/tb_material"
+            android:layout_marginLeft="10dp" />
+
+        <CheckBox
+            android:textSize="18dp"
+            android:layout_below="@+id/tb_material"
+            android:id="@+id/tb_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Size : "
+            android:layout_marginLeft="50dp"
+            android:textColor="@color/white" />
+
+        <TextView
+            android:id="@+id/txtSize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="38dp"
+            android:layout_toRightOf="@id/tb_material"
+            android:text="Size of "
+            android:textColor="@color/white"
+            android:textSize="18dp" />
+
+        <CheckBox
+            android:textSize="18dp"
+            android:layout_below="@+id/tb_size"
+            android:id="@+id/tb_people"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="People : "
+            android:layout_marginLeft="50dp"
+            android:textColor="@color/white" />
+
+        <TextView
+            android:id="@+id/txtPeople"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txtSize"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_toRightOf="@id/tb_material"
+            android:text="People"
+            android:textColor="@color/white"
+            android:textSize="18dp" />
+
+    </RelativeLayout>
+
+
+
+    <Button
+        android:id="@+id/btn_checkout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="50dp"
+        android:background="@color/white"
+        android:padding="10dp"
+        android:text="Checkout"
+        android:textColor="@color/green"
+        android:textSize="@dimen/sp_20"
+        android:visibility="visible" />
+</LinearLayout>

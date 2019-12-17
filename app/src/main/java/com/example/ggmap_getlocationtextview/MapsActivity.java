@@ -1,11 +1,6 @@
 package com.example.ggmap_getlocationtextview;
 
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.FragmentActivity;
-
 import android.Manifest;
-import android.app.Notification;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -20,6 +15,17 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.FragmentActivity;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -34,14 +40,6 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.Volley;
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,7 +48,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, joinDialog.BottomSheetListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, joinDialog.BottomSheetListener, DirectionJoinListener {
 
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationClient;
@@ -58,10 +56,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private double currentLatitude = 0.0;
     private double currentLongtitude = 0.0;
 
+    private joinDialog.BottomSheetListener mListener;
+
     Marker markerSearch;
     Marker markerWaste;
- List<Marker> markerWasteList = new ArrayList<>();
-
+    List<Marker> markerJoin = new ArrayList<>();
+    List<Marker> markerWasteList = new ArrayList<>();
     private List<Polyline> polyLinePaths;
 
     SearchView searchViewLocation;
@@ -74,30 +74,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     TextView txt_duration;
     String username = null;
     String dateOfBirth = null;
-    String phoneNumber = null;
     String userJob = null;
     String userGender  = null;
-    String url = "http://192.168.1.9/androidwebservice/wasteLocation.php";
-
-    public String add;
+    String userID = null;
+    String userScore = null;
+    String url = "http://192.168.1.6/androidwebservice/wasteLocation.php";
+    String getWasteJoinURL = "http://192.168.1.6/androidwebservice/WasteJoin.php";
+    String wasteID = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         Intent mapActivityIntent = getIntent();
         username = mapActivityIntent.getStringExtra("username");
         dateOfBirth = mapActivityIntent.getStringExtra("dateOfBirth");
-        phoneNumber = mapActivityIntent.getStringExtra("phoneNumber");
-        userJob = mapActivityIntent.getStringExtra("job");
-        userGender = mapActivityIntent.getStringExtra("gender");
+        userJob = mapActivityIntent.getStringExtra("userJob");
+        userGender = mapActivityIntent.getStringExtra("userGender");
+        userID = mapActivityIntent.getStringExtra("userID");
+        userScore = mapActivityIntent.getStringExtra("userScore");
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         checkPermisson();
-
         getLocation(url);
+        getDataJoinID(getWasteJoinURL);
         reflect();
         searchLocation();
         reportWaste();
@@ -107,8 +109,59 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 location();
             }
         });
-
         account();
+        ranking();
+        ibtn_clean.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MapsActivity.this, CleanActivity.class);
+                intent.putExtra("userID",userID);
+                startActivity(intent);
+            }
+        });
+    }
+
+    private void ranking(){
+        ibtn_rank.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MapsActivity.this, Ranking.class);
+                startActivity(intent);
+            }
+        });
+    }
+    private void getDataJoinID(String url){
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                for (int i = 0; i < response.length(); i++) {
+                    try {
+                        JSONObject object = response.getJSONObject(i);
+                        double wasteJoinLat = object.getDouble("waste_latitude");
+                        double wasteJoinLong = object.getDouble("waste_longtitude");
+                        String volunteer_id = object.getString("volunteer_id");
+                        if(volunteer_id.equals(userID)) {
+                            for (int j = 0; j < markerWasteList.size(); j++) {
+                                if (markerWasteList.get(j).getPosition().latitude == wasteJoinLat
+                                        && markerWasteList.get(j).getPosition().longitude == wasteJoinLong) {
+                                    markerWasteList.get(j).setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+
+                                    markerJoin.add(markerWasteList.get(j));
+                                }
+                            }
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+            }
+        });
+        requestQueue.add(jsonArrayRequest);
     }
 
     private void location(){
@@ -126,7 +179,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ibtn_account.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //edit profile bỏ vào đây nhé bạn t
+                Intent intent = new Intent(MapsActivity.this, ChangeProfile.class);
+                intent.putExtra("userID",userID);
+                startActivity(intent);
             }
         });
     }
@@ -152,8 +207,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 startActivity(intent);
 
-
-
             }
         });
     }
@@ -178,7 +231,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     if (location != null) {
                         currentLatitude = location.getLatitude();
                         currentLongtitude = location.getLongitude();
-
                         //Call onReadyMap()
                         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                                 .findFragmentById(R.id.map);
@@ -232,33 +284,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     //get waste Marker from database into MAP
     private void getLocation(String url){
-        //Handle by Volley
         RequestQueue requestQueue = Volley.newRequestQueue(this);
-        //Create
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 for (int i = 0; i < response.length(); i++) {
                     try {
                         JSONObject object = response.getJSONObject(i);
-
-                            double wasteLocation_latitude = Double.parseDouble(object.getString("waste_latitute"));
+                            double wasteLocation_latitude = Double.parseDouble(object.getString("waste_latitude"));
                             double wasteLocation_longtitude = Double.parseDouble(object.getString("waste_longtitude"));
                             LatLng latLng = new LatLng(wasteLocation_latitude, wasteLocation_longtitude);
                             Geocoder geocoder = new Geocoder(getApplicationContext());
                             try {
                                 List<Address> addressList = geocoder.getFromLocation(wasteLocation_latitude, wasteLocation_longtitude, 1);
                                 String str = addressList.get(0).getAddressLine(0);
-
                                 markerWaste = mMap.addMarker(new MarkerOptions().position(latLng).title(str));
                                 markerWasteList.add(markerWaste);
 
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
-
-
-
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -282,9 +327,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ibtn_account = (ImageButton) findViewById(R.id.ibtn_account);
         txt_distance = (TextView) findViewById(R.id.txt_distance);
         txt_duration = (TextView) findViewById(R.id.txt_duration);
-
     }
-
     private void searchLocation(){
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -352,13 +395,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 @Override
                 public boolean onMarkerClick(final Marker m) {
 
-                    //marker search can't be join
+                    //marker search can't join
                     if(markerSearch != null) {
                         if ((m.getPosition().latitude == markerSearch.getPosition().latitude)
                                 && (m.getPosition().longitude == markerSearch.getPosition().longitude)) {
                             return false;
                         }
                     }
+
+                    //marker join can't join
+                    for(int i = 0; i < markerJoin.size();i++){
+                        if(markerJoin.get(i) != null) {
+                            if ((m.getPosition().latitude == markerJoin.get(i).getPosition().latitude)
+                                    && (m.getPosition().longitude == markerJoin.get(i).getPosition().longitude)) {
+                                DirectionJoin a = new DirectionJoin(MapsActivity.this,currentLatitude,currentLongtitude,m.getPosition().latitude,m.getPosition().longitude);
+                                a.execute();
+                                return false;
+                            }
+                        }
+
+
+
+
+                    }
+
                     Geocoder geocoder = new Geocoder(getApplicationContext());
                     List<Address> addressList = null;
                     try {
@@ -367,20 +427,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         e.printStackTrace();
                     }
 
-                    String address = addressList.get(0).getAddressLine(0);
+                    String waste_address = addressList.get(0).getAddressLine(0);
                     final Bundle bundle = new Bundle();
 
-                    bundle.putString("address", address);
+                    bundle.putString("waste_address", waste_address);
                     bundle.putDouble("currentLatitude", currentLatitude);
                     bundle.putDouble("currentLongtitude", currentLongtitude);
                     bundle.putDouble("wasteLatitude", m.getPosition().latitude);
                     bundle.putDouble("wasteLongtitude", m.getPosition().longitude);
                     bundle.putString("username",username);
                     bundle.putString("dateOfBirth",dateOfBirth);
-                    bundle.putString("phoneNumber",phoneNumber);
-                    bundle.putString("job",userJob);
-                    bundle.putString("gender",userGender);
-                    add=address;
+                    bundle.putString("userJob",userJob);
+                    bundle.putString("userGender",userGender);
+                    bundle.putString("userID",userID);
+                    bundle.putString("userScore",userScore);
+                    Log.e("CheckABC",   userID +"-"
+                            +dateOfBirth+"-"+userJob+"-"+userGender+"-"+userScore);
                     RequestQueue requestQueue = Volley.newRequestQueue(MapsActivity.this);
                     JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
                         @Override
@@ -388,17 +450,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             for (int i = 0; i < response.length(); i++) {
                                 try {
                                     JSONObject object = response.getJSONObject(i);
-
-                                    double wasteLocation_latitude = Double.parseDouble(object.getString("waste_latitute"));
+                                    double wasteLocation_latitude = Double.parseDouble(object.getString("waste_latitude"));
                                     double wasteLocation_longtitude = Double.parseDouble(object.getString("waste_longtitude"));
                                     if(wasteLocation_latitude == m.getPosition().latitude && wasteLocation_longtitude == m.getPosition().longitude){
-                                        String numberOfPeople = object.getString("waste_people");
-                                        String size = object.getString("waste_size");
-                                        String image_name = object.getString("waste_image");
-                                        bundle.putString("waste_people", numberOfPeople);
-                                        bundle.putString("waste_size", size);
-                                        bundle.putString("waste_image",image_name);
-
+                                        String waste_people = object.getString("waste_people");
+                                        String waste_size = object.getString("waste_size");
+                                        String waste_image = object.getString("waste_image");
+                                        bundle.putString("waste_people", waste_people);
+                                        bundle.putString("waste_size", waste_size);
+                                        bundle.putString("waste_image",waste_image);
                                         joinDialog dialog = new joinDialog();
                                         dialog.setArguments(bundle);
                                         dialog.show(getSupportFragmentManager(), "example");
@@ -431,33 +491,42 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
     @Override
     public void onDirectionFinderSuccess(List<Route> routes) {
-
         onDirectionFinderStart();
         polyLinePaths = new ArrayList<>();
-
         for( Route route: routes){
             txt_duration.setText(route.duration + " m");
             txt_distance.setText(route.distance + " km");
-
           PolylineOptions polylineOptions = new PolylineOptions().geodesic(true).color(Color.RED).width(10);
 
             for( int i = 0; i <route.points.size();i++ ){
                 polylineOptions.add(route.points.get(i));
             }
-
             polyLinePaths.add(mMap.addPolyline(polylineOptions));
         }
     }
 
     @Override
-    public void changeColorJoinMaker(double wasteJoinLat, double wasteJoinLon) {
-        Log.e("Aloha",wasteJoinLat + " - " + wasteJoinLon);
+    public void changeColorJoinMaker(double wasteJoinLat, double wasteJoinLon, String wasteID, String wasteAddress ) {
         for(int i = 0; i < markerWasteList.size(); i++){
                 if(markerWasteList.get(i).getPosition().latitude == wasteJoinLat && markerWasteList.get(i).getPosition().longitude == wasteJoinLon){
-                    Log.e("Aloha",markerWasteList.get(i).getPosition().latitude + " + " + markerWasteList.get(i).getPosition().longitude);
                     markerWasteList.get(i).setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+
+                    if(wasteID != null) {
+                        markerJoin.add(markerWasteList.get(i));
+                        this.wasteID = wasteID;
+                    }
                     break;
                 }
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void setText(List<Route> routes) {
+        mListener.onDirectionFinderSuccess(routes);
     }
 }

@@ -37,6 +37,7 @@ dependencies {
 
     // Add the SDK for Firebase Cloud Messaging
     implementation 'com.google.firebase:firebase-messaging:20.0.1'
+    implementation 'javax.mail:mail:1.4.1'
 }
 
 apply plugin: 'com.google.gms.google-services'

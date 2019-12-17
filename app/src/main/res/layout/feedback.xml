@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="350dp"
+    android:layout_height="460dp"
+    android:layout_gravity="center"
+    android:background="@color/white"
+    >
+
+    <LinearLayout
+        android:layout_width="350dp"
+        android:layout_height="205dp"
+        android:background="@color/green"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/txt_close"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="end"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/circle"
+            android:gravity="center"
+            android:text="X"
+            android:textColor="@color/white"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:gravity="center"
+            android:text="FEEDBACK"
+            android:textColor="@color/white"
+            android:textSize="30sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="300dp"
+            android:layout_height="50dp"
+            android:layout_marginLeft="25dp"
+            android:gravity="center"
+            android:text="We want to know you thought of your experience at Uberwasted. We'd love to hear your feedback"
+            android:textColor="@color/white"
+            android:textSize="13sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/ibtn_sad"
+                android:layout_width="84dp"
+                android:layout_height="78dp"
+                android:layout_gravity="center"
+                android:layout_marginLeft="50dp"
+                android:background="@color/green"
+                app:srcCompat="@drawable/sad_grey" />
+
+            <ImageButton
+                android:id="@+id/ibtn_normal"
+                android:layout_width="84dp"
+                android:layout_height="78dp"
+                android:layout_gravity="center"
+                android:background="@color/green"
+                app:srcCompat="@drawable/neutral_grey" />
+
+            <ImageButton
+                android:id="@+id/ibtn_happy"
+                android:layout_width="84dp"
+                android:layout_height="78dp"
+                android:layout_gravity="center"
+                android:background="@color/green"
+                app:srcCompat="@drawable/happy_grey" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/edt_feedbackContent"
+        android:layout_width="311dp"
+        android:layout_height="150dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/border"
+        android:gravity="top|left"
+
+        android:hint="your feedback" />
+
+    <ImageButton
+        android:id="@+id/btn_sendFeedback"
+        android:layout_width="118dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/button_border_feedback"
+        android:textColor="@color/green"
+        android:src="@drawable/ic_arrow_forward_black_24dp"
+
+        />
+
+</LinearLayout>

@@ -48,7 +48,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="45dp"
-            android:layout_marginTop="18dp"
+            android:layout_marginTop="20dp"
             android:text="Pasword"
             android:textColor="@color/white"
             android:textSize="20sp" />
@@ -60,6 +60,7 @@
             android:layout_marginLeft="43dp"
             android:layout_marginTop="10dp"
             android:ems="10"
+            android:hint="Input password"
             android:inputType="textPassword" />
 
         <Button

@@ -88,7 +88,7 @@
         android:layout_alignParentBottom="true"
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="90dp"
-        android:background="@drawable/button_direction"
+        android:background="@drawable/ic_my_location_black_24dp"
          />
 
     <LinearLayout

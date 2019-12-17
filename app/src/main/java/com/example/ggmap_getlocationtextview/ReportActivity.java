@@ -77,7 +77,7 @@ public class ReportActivity extends AppCompatActivity
 //       implements View.OnClickListener
 {
     private static String JSON_STRING;
-    private static final String UPLOAD_URL = "http://192.168.1.9/upload/insert_image.php";
+    private static final String UPLOAD_URL = "http://192.168.1.6/upload/insert_image.php";
     private static final int IMAGE_REQUEST_CODE = 3;
     private static final int STORAGE_PERMISSION_CODE = 123;
     private ImageView imageView;
@@ -103,15 +103,15 @@ public class ReportActivity extends AppCompatActivity
         requestStoragePermission();
 
         imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Complete action using"), IMAGE_REQUEST_CODE);
-                sendFCMPush();
-            }
-        }
+                                         @Override
+                                         public void onClick(View v) {
+                                             Intent intent = new Intent();
+                                             intent.setType("image/*");
+                                             intent.setAction(Intent.ACTION_GET_CONTENT);
+                                             startActivityForResult(Intent.createChooser(intent, "Complete action using"), IMAGE_REQUEST_CODE);
+                                             sendFCMPush();
+                                         }
+                                     }
         );
 
         btnReport.setOnClickListener(new View.OnClickListener() {
@@ -171,7 +171,7 @@ public class ReportActivity extends AppCompatActivity
     }
 
     public void uploadMultipart1() {
-        String url = "http://192.168.1.9/upload/insert_image1.php";
+        String url = "http://192.168.1.6/upload/insert_image1.php";
 
         String caption = etCaption.getText().toString().trim();
         //String size=etSize.getText().toString().trim();
@@ -344,7 +344,7 @@ public class ReportActivity extends AppCompatActivity
 
         @Override
         protected void onPreExecute() {
-            url = "http://192.168.1.9/upload/getPeople.php";
+            url = "http://192.168.1.6/upload/getPeople.php";
         }
 
         @Override
@@ -387,7 +387,7 @@ public class ReportActivity extends AppCompatActivity
 
         @Override
         protected void onPreExecute() {
-            url = "http://192.168.1.9/upload/getMaterial.php";
+            url = "http://192.168.1.6/upload/getMaterial.php";
         }
 
         @Override
@@ -430,7 +430,7 @@ public class ReportActivity extends AppCompatActivity
 
         @Override
         protected void onPreExecute() {
-            url = "http://192.168.1.9/upload/getSize.php";
+            url = "http://192.168.1.6/upload/getSize.php";
         }
 
         @Override

@@ -18,7 +18,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DirectionFinder {
+public class DirectionFinder  {
     private double currentLatitude;
     private double currentLongtitude;
     private double wasteLatitude;
@@ -35,6 +35,7 @@ public class DirectionFinder {
     }
 
     public void execute() {
+        Log.e("Hello","Xanh");
         new DownloadRawData().execute(createURL());
     }
 
@@ -48,7 +49,7 @@ public class DirectionFinder {
         return DIRECTION_URL + olon + "," + olat + ";" + dlon + "," + dlat + "?" + "access_token=" + accessToken;
     }
 
-    public class DownloadRawData extends AsyncTask<String, Void, String> {
+        public class DownloadRawData extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... params) {
             String link = params[0];
