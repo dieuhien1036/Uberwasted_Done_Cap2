@@ -2,26 +2,16 @@ package com.example.ggmap_getlocationtextview;
 
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.location.Address;
-import android.location.Geocoder;
-import android.media.MediaSync;
 import android.net.Uri;
-import android.net.UrlQuerySanitizer;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -41,20 +31,14 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import net.gotev.uploadservice.MultipartUploadRequest;
 import net.gotev.uploadservice.UploadNotificationConfig;
 import net.gotev.uploadservice.UploadServiceBroadcastReceiver;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -65,13 +49,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import static com.google.android.gms.tasks.Tasks.whenAllSuccess;
 
 public class ReportActivity extends AppCompatActivity
 //       implements View.OnClickListener
@@ -215,7 +195,7 @@ public class ReportActivity extends AppCompatActivity
             size = "Medium";
         }
         if (radioButton_Large.isChecked()) {
-            size = "Large";
+            size = "Big";
         }
         String caption = etCaption.getText().toString().trim();
         //String size=etSize.getText().toString().trim();
@@ -469,7 +449,7 @@ public class ReportActivity extends AppCompatActivity
             if (result.equals("Medium")) {
                 radioButton_Medium.setChecked(true);
             }
-            if (result.equals("Large")) {
+            if (result.equals("Big")) {
                 radioButton_Large.setChecked(true);
             }
         }
