@@ -79,14 +79,14 @@ public class Register extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "You must type all inputs", Toast.LENGTH_SHORT).show();
             return;
         }
-        if (!NAME_PATTERN.matcher(firstNameInput).matches()) {
-            Toast.makeText(getApplicationContext(), "Please enter a valid first name", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (!NAME_PATTERN.matcher(lastNameInput).matches()) {
-            Toast.makeText(getApplicationContext(), "Please enter a valid last name", Toast.LENGTH_SHORT).show();
-            return;
-        }
+//        if (!NAME_PATTERN.matcher(firstNameInput).matches()) {
+//            Toast.makeText(getApplicationContext(), "Please enter a valid first name", Toast.LENGTH_SHORT).show();
+//            return;
+//        }
+//        if (!NAME_PATTERN.matcher(lastNameInput).matches()) {
+//            Toast.makeText(getApplicationContext(), "Please enter a valid last name", Toast.LENGTH_SHORT).show();
+//            return;
+//        }
         if (!Patterns.EMAIL_ADDRESS.matcher(emailInput).matches()) {
             Toast.makeText(getApplicationContext(), "Please enter a valid email address", Toast.LENGTH_SHORT).show();
             return;

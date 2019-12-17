@@ -23,6 +23,9 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class LoginActivity extends AppCompatActivity {
     EditText edt_Email;
@@ -30,6 +33,7 @@ public class LoginActivity extends AppCompatActivity {
     ImageButton bnt_Login;
     LinearLayout linearLayout;
     Button btn_ForgotPassword;
+    Button btn_Register;
     String url ="http://192.168.1.6/androidwebservice/login.php";
     SharedPreferences sharedPreferences;
     @Override
@@ -64,6 +68,13 @@ public class LoginActivity extends AppCompatActivity {
                startActivity(intent);
             }
         });
+        btn_Register.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(LoginActivity.this,Register.class);
+                startActivity(intent);
+            }
+        });
 
     }
 
@@ -72,6 +83,7 @@ public class LoginActivity extends AppCompatActivity {
         boolean OK = true;
         String email = edt_Email.getText().toString().trim();
         String password = edt_Pass.getText().toString().trim();
+        String passwordMD5=getMd5(password);
         if(email.isEmpty() || password.isEmpty()){
             Toast.makeText(LoginActivity.this,"Input full information",Toast.LENGTH_SHORT).show();
             return false;
@@ -105,15 +117,9 @@ public class LoginActivity extends AppCompatActivity {
                         String userGender  = object.getString("volunteer_gender");
                         String userScore = object.getString("volunteer_score");
                         Log.e("BBB1",email + " " + password +" "+userID);
-                        if(email.equals(edt_Email.getText().toString().trim()) == false || password.equals(edt_Pass.getText().toString()) == false){
-                            if(email.equals(edt_Email.getText().toString().trim()) == false) {
-                                Toast.makeText(LoginActivity.this, "Wrong Email", Toast.LENGTH_SHORT).show();
-                                return;
-                            }else {
-                                Toast.makeText(LoginActivity.this, "Wrong Pasword", Toast.LENGTH_SHORT).show();
-                                return;
-                            }
-                        }else{
+                        Log.e("md5",getMd5(edt_Pass.getText().toString()));
+                        Log.e("l",String.valueOf(response.length()));
+                        if(email.equals(edt_Email.getText().toString().trim()) == true && password.equals(getMd5(edt_Pass.getText().toString())) == true){
 
                             SharedPreferences.Editor editor = sharedPreferences.edit();
                             editor.remove("email");
@@ -144,6 +150,7 @@ public class LoginActivity extends AppCompatActivity {
                             startActivity(mapActivityIntent);
                             return;
                         }
+                        Toast.makeText(LoginActivity.this, "Wrong email or password", Toast.LENGTH_SHORT).show();
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -158,11 +165,39 @@ public class LoginActivity extends AppCompatActivity {
         requestQueue.add(jsonArrayRequest);
     }
 
+    public static String getMd5(String input)
+    {
+        try {
+
+            // Static getInstance method is called with hashing MD5
+            MessageDigest md = MessageDigest.getInstance("MD5");
+
+            // digest() method is called to calculate message digest
+            //  of an input digest() return array of byte
+            byte[] messageDigest = md.digest(input.getBytes());
+
+            // Convert byte array into signum representation
+            BigInteger no = new BigInteger(1, messageDigest);
+
+            // Convert message digest into hex value
+            String hashtext = no.toString(16);
+            while (hashtext.length() < 32) {
+                hashtext = "0" + hashtext;
+            }
+            return hashtext;
+        }
+
+        // For specifying wrong message digest algorithms
+        catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
     private void AnhXa(){
         edt_Email = (EditText) findViewById(R.id.edtEmail);
         edt_Pass = (EditText) findViewById(R.id.edtPass);
         bnt_Login = (ImageButton) findViewById(R.id.btn_Login);
         linearLayout = (LinearLayout) findViewById(R.id.linear);
         btn_ForgotPassword = (Button) findViewById(R.id.btn_ForgotPassword);
+        btn_Register=findViewById(R.id.btn_account);
     }
 }
