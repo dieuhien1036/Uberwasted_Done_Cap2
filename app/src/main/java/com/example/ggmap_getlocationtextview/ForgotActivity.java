@@ -11,16 +11,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MainActivity extends AppCompatActivity {
+public class ForgotActivity extends AppCompatActivity {
     String message,mail,subject;
     EditText etEmail;
     ImageButton btnSend;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.forgot_main);
 
-        btnSend = this.findViewById(R.id.button);
+        btnSend = this.findViewById(R.id.btnSend);
         etEmail = this.findViewById(R.id.et_Email);
 
         btnSend.setOnClickListener(new View.OnClickListener() {
@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
                 /*Intent i = new Intent(MainActivity.this, CodeChecker.class);
                 i.putExtra("mail", message);
                 startActivity(i);*/
-                Intent intent = new Intent(MainActivity.this, CodeChecker.class);
+                Intent intent = new Intent(ForgotActivity.this, CodeChecker.class);
                 Bundle extras = new Bundle();
                 extras.putString("mail",message);
                 extras.putString("email",mail);

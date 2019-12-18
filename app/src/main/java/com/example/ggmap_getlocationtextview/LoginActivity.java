@@ -34,7 +34,7 @@ public class LoginActivity extends AppCompatActivity {
     LinearLayout linearLayout;
     Button btn_ForgotPassword;
     Button btn_Register;
-    String url ="http://192.168.1.6/androidwebservice/login.php";
+    String url ="http://192.168.43.112/androidwebservice/login.php";
     SharedPreferences sharedPreferences;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +42,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.login_activity);
         AnhXa();
         sharedPreferences = getSharedPreferences("DataLogin",MODE_PRIVATE);
-       if(!sharedPreferences.getString("email","").isEmpty() && !sharedPreferences.getString("password","").isEmpty()){
+        if(!sharedPreferences.getString("email","").isEmpty() && !sharedPreferences.getString("password","").isEmpty()){
             Intent mapActivityIntent = new Intent(LoginActivity.this, MapsActivity.class);
             mapActivityIntent.putExtra("userID",sharedPreferences.getString("userID",""));
             mapActivityIntent.putExtra("username",sharedPreferences.getString("username",""));
@@ -63,9 +63,9 @@ public class LoginActivity extends AppCompatActivity {
         btn_ForgotPassword.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-               Intent intent = new Intent(LoginActivity.this,MainActivity.class);
-               Log.e("Dat ngu","Hien dep");
-               startActivity(intent);
+                Intent intent = new Intent(LoginActivity.this,ForgotActivity.class);
+                Log.e("Dat ngu","Hien dep");
+                startActivity(intent);
             }
         });
         btn_Register.setOnClickListener(new View.OnClickListener() {
@@ -150,7 +150,7 @@ public class LoginActivity extends AppCompatActivity {
                             startActivity(mapActivityIntent);
                             return;
                         }
-                        Toast.makeText(LoginActivity.this, "Wrong email or password", Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(LoginActivity.this, "Wrong email or password", Toast.LENGTH_SHORT).show();
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -198,6 +198,6 @@ public class LoginActivity extends AppCompatActivity {
         bnt_Login = (ImageButton) findViewById(R.id.btn_Login);
         linearLayout = (LinearLayout) findViewById(R.id.linear);
         btn_ForgotPassword = (Button) findViewById(R.id.btn_ForgotPassword);
-        btn_Register=findViewById(R.id.btn_account);
+        btn_Register=findViewById(R.id.btn_register);
     }
 }

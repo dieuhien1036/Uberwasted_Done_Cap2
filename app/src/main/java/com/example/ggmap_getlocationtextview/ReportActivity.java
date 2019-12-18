@@ -57,7 +57,7 @@ public class ReportActivity extends AppCompatActivity
 //       implements View.OnClickListener
 {
     private static String JSON_STRING;
-    private static final String UPLOAD_URL = "http://192.168.1.6/upload/insert_image.php";
+    private static final String UPLOAD_URL = "http://192.168.43.112/upload/insert_image.php";
     private static final int IMAGE_REQUEST_CODE = 3;
     private static final int STORAGE_PERMISSION_CODE = 123;
     private ImageView imageView;
@@ -151,7 +151,7 @@ public class ReportActivity extends AppCompatActivity
     }
 
     public void uploadMultipart1() {
-        String url = "http://192.168.1.6/upload/insert_image1.php";
+        String url = "http://192.168.43.112/upload/insert_image1.php";
 
         String caption = etCaption.getText().toString().trim();
         //String size=etSize.getText().toString().trim();
@@ -324,7 +324,7 @@ public class ReportActivity extends AppCompatActivity
 
         @Override
         protected void onPreExecute() {
-            url = "http://192.168.1.6/upload/getPeople.php";
+            url = "http://192.168.43.112/upload/getPeople.php";
         }
 
         @Override
@@ -367,7 +367,7 @@ public class ReportActivity extends AppCompatActivity
 
         @Override
         protected void onPreExecute() {
-            url = "http://192.168.1.6/upload/getMaterial.php";
+            url = "http://192.168.43.112/upload/getMaterial.php";
         }
 
         @Override
@@ -410,7 +410,7 @@ public class ReportActivity extends AppCompatActivity
 
         @Override
         protected void onPreExecute() {
-            url = "http://192.168.1.6/upload/getSize.php";
+            url = "http://192.168.43.112/upload/getSize.php";
         }
 
         @Override

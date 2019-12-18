@@ -20,7 +20,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 public class Ranking extends AppCompatActivity {
-    private String urlGetUser = "http://192.168.1.6/ub/getRanking.php";
+    private String urlGetUser = "http://192.168.43.112/ub/getRanking.php";
     ArrayList<User> arrayUser;
     ListView lvUser;
     RankingDataAdapter rankingDataAdapter;

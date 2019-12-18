@@ -12,7 +12,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Base64;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -70,8 +69,8 @@ public class Checkin extends AppCompatActivity implements  View.OnClickListener{
     BufferedReader bufferedReader;
     StringBuilder stringBuilder;
     boolean check = true;
-    String urlCheckin = "http://192.168.1.6/ub/checkin.php";
-    String urlGetJoin = "http://192.168.1.6/ub/getJoin.php";
+    String urlCheckin = "http://192.168.43.112/ub/checkin.php";
+    String urlGetJoin = "http://192.168.43.112/ub/getJoin.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -180,7 +179,6 @@ public class Checkin extends AppCompatActivity implements  View.OnClickListener{
             protected void onPostExecute(String string1) {
 
                 super.onPostExecute(string1);
-                Toast.makeText(Checkin.this, string1, Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -322,7 +320,6 @@ public class Checkin extends AppCompatActivity implements  View.OnClickListener{
                                 JSONObject object = response.getJSONObject(i);
                                 if (object.getInt("waste_id") == waste_id && object.getInt("volunteer_id") == volunteer_id) {
                                     codeCheck = String.valueOf(object.getInt("join_id"));
-                                    Toast.makeText(Checkin.this, String.valueOf(object.getInt("join_id")), Toast.LENGTH_SHORT).show();
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -336,7 +333,7 @@ public class Checkin extends AppCompatActivity implements  View.OnClickListener{
             }
         });
         requestQueue.add(jsonArrayRequest);
-        Log.d("AAA", "4");
+
     }
 
 }

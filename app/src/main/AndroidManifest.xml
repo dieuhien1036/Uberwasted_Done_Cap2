@@ -44,6 +44,11 @@
         <activity android:name=".ChangeProfile"></activity>
         <activity android:name=".Checkout"></activity>
         <activity android:name=".Checkin"></activity>
+        <activity android:name=".ForgotActivity"></activity>
+        <activity android:name=".CodeChecker"></activity>
+        <activity
+            android:name=".PasswordChanger" android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        </activity>
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />

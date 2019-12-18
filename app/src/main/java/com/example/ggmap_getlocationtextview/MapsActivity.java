@@ -48,7 +48,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, joinDialog.BottomSheetListener, DirectionJoinListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, joinDialog.BottomSheetListener {
 
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationClient;
@@ -78,8 +78,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     String userGender  = null;
     String userID = null;
     String userScore = null;
-    String url = "http://192.168.1.6/androidwebservice/wasteLocation.php";
-    String getWasteJoinURL = "http://192.168.1.6/androidwebservice/WasteJoin.php";
+    String url = "http://192.168.43.112/androidwebservice/wasteLocation.php";
+    String getWasteJoinURL ="http://192.168.43.112/androidwebservice/WasteJoin.php";
     String wasteID = null;
 
     @Override
@@ -114,7 +114,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ibtn_clean.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MapsActivity.this, CleanActivity.class);
+                Intent intent = new Intent(MapsActivity.this,CleanActivity.class);
                 intent.putExtra("userID",userID);
                 startActivity(intent);
             }
@@ -125,7 +125,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ibtn_rank.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MapsActivity.this, Ranking.class);
+                Intent intent = new Intent(MapsActivity.this,Ranking.class);
                 startActivity(intent);
             }
         });
@@ -179,7 +179,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ibtn_account.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MapsActivity.this, ChangeProfile.class);
+                Intent intent = new Intent(MapsActivity.this,ChangeProfile.class);
                 intent.putExtra("userID",userID);
                 startActivity(intent);
             }
@@ -402,23 +402,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             return false;
                         }
                     }
-
-                    //marker join can't join
-                    for(int i = 0; i < markerJoin.size();i++){
-                        if(markerJoin.get(i) != null) {
-                            if ((m.getPosition().latitude == markerJoin.get(i).getPosition().latitude)
-                                    && (m.getPosition().longitude == markerJoin.get(i).getPosition().longitude)) {
-                                DirectionJoin a = new DirectionJoin(MapsActivity.this,currentLatitude,currentLongtitude,m.getPosition().latitude,m.getPosition().longitude);
-                                a.execute();
-                                return false;
-                            }
-                        }
-
-
-
-
-                    }
-
                     Geocoder geocoder = new Geocoder(getApplicationContext());
                     List<Address> addressList = null;
                     try {
@@ -525,8 +508,4 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    @Override
-    public void setText(List<Route> routes) {
-        mListener.onDirectionFinderSuccess(routes);
-    }
 }

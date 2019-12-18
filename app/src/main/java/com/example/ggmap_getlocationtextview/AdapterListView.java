@@ -89,15 +89,13 @@ public class AdapterListView extends BaseAdapter {
             holder.btn_cancel.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    //delete data in join_clean
-                    //deleteJoin("",joinID.get(position));
                     confirmDelete(joincleanlist.get(position).getJoin_id());
                     new Timer().schedule(new TimerTask() {
                         @Override
                         public void run() {
                             mListener.changeColorJoinMaker(joincleanlist.get(position).getWasteLatitude(),joincleanlist.get(position).getWasteLongtitude(),null,null);
                         }
-                    }, 2000);
+                    }, 3000);
                 }
             });
             holder.btn_checkin.setOnClickListener(new View.OnClickListener() {

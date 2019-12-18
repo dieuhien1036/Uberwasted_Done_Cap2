@@ -21,7 +21,7 @@ import org.json.JSONObject;
 public class CheckCheckinRequi extends AppCompatActivity implements View.OnClickListener {
     private double current_latitude;
     private double currennt_longtitude;
-    String urlGetData = "http://192.168.1.6/ub/getWaste.php";
+    String urlGetData = "http://192.168.43.112/ub/getWaste.php";
 
     //    Button btnclick ;
 //    private TextView tx;
@@ -41,7 +41,7 @@ public class CheckCheckinRequi extends AppCompatActivity implements View.OnClick
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btnclick: {
-                checkWasteForCheckin("http://192.168.1.6/ub/getWaste.php", current_latitude, currennt_longtitude);
+                checkWasteForCheckin("http://192.168.43.112/ub/getWaste.php", current_latitude, currennt_longtitude);
             }
         }
     }

@@ -35,8 +35,8 @@ public class FeedbackActivity extends AppCompatActivity {
     private TextView txt_userID;
     private EditText edt_email;
     Button btnOK;
-    private String urlGetUserID ="http://192.168.1.6/androidwebservice/login.php";
-    private String urlInsert = "http://192.168.1.6/androidwebservice/feedback.php";
+    private String urlGetUserID ="http://192.168.43.112/androidwebservice/login.php";
+    private String urlInsert = "http://192.168.43.112/androidwebservice/feedback.php";
     private String feedbackStatus="";
     private String feedbackContent="";
     String user_ID;
@@ -44,7 +44,7 @@ public class FeedbackActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.forgot_main);
         feedbackDialog = new Dialog(this);
         feedbackDialog.setCanceledOnTouchOutside(false);
     }

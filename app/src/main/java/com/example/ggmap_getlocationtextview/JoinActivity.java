@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -38,14 +39,19 @@ public class JoinActivity extends AppCompatActivity {
     String userID;
     int wasteID;
     String waste_address;
-    String wasteURL = "http://192.168.1.6/androidwebservice/wasteLocation.php";
-    String insertJoinURL ="http://192.168.1.6/androidwebservice/insertJoin.php";
+    //String urlString = (String) getText(R.string.hienngu);
+    String wasteURL = "http://192.168.43.112/androidwebservice/wasteLocation.php";
+    String insertJoinURL ="http://192.168.43.112/androidwebservice/insertJoin.php";
+    String urlWasteJoin = "http://192.168.43.112/androidwebservice/WasteJoin.php";
+    Boolean OK = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_join3);
+
         getWasteID(wasteURL);
+        checkJoin(urlWasteJoin);
         reflect();
         Bundle bundle = getIntent().getExtras();
         wasteLatitude = bundle.getDouble("wasteLatitude");
@@ -84,11 +90,38 @@ public class JoinActivity extends AppCompatActivity {
                 data.putExtra("wasteAddress",waste_address);
                 data.putExtra("userID",userID);
                 data.putExtra("wasteID",wasteID);
-                insertData(insertJoinURL);
                 setResult(RESULT_OK,data);
                 finish();
             }
         });
+    }
+
+    private void checkJoin(String url){
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                for (int i = 0; i < response.length(); i++) {
+                    try {
+                        JSONObject object = response.getJSONObject(i);
+                        int waste_id = object.getInt("waste_id");
+                        String volunteer_id = object.getString("volunteer_id");
+                        if(wasteID == waste_id &&  userID.equals(volunteer_id)){
+                            Toast.makeText(JoinActivity.this, "This join is not join", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                insertData(insertJoinURL);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+            }
+        });
+        requestQueue.add(jsonArrayRequest);
     }
 
     private void getWasteID(String url){

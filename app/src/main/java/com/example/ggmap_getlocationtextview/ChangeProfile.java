@@ -1,10 +1,13 @@
 package com.example.ggmap_getlocationtextview;
 
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.content.Intent;
+import android.media.Image;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -30,6 +33,7 @@ import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -44,11 +48,16 @@ public class ChangeProfile extends AppCompatActivity implements View.OnClickList
     private EditText edtBirthDate;
     private RadioButton rbMale;
     private RadioButton rbFemale;
+    public Button btn_feedback;
     private TextView txtEmail;
     private ImageButton btnSave;
+    private Dialog feedbackDialog;
+    private String urlInsert = "http://192.168.43.112/androidwebservice/feedback.php";
+    private String feedbackStatus="";
+    private String feedbackContent="";
     private ImageView ava;
-    private String urlGetData = "http://192.168.1.6/ub/getUser.php";
-    private String urlUpload = "http://192.168.1.6/ub/updateProfile.php";
+    private String urlGetData = "http://192.168.43.112/ub/getUser.php";
+    private String urlUpload = "http://192.168.43.112/ub/updateProfile.php";
     private String idReceived;
 
     private static final Pattern NAME_PATTERN =
@@ -57,6 +66,7 @@ public class ChangeProfile extends AppCompatActivity implements View.OnClickList
             );
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("dat123","dat123");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_change_profile);
         reflect();
@@ -70,12 +80,18 @@ public class ChangeProfile extends AppCompatActivity implements View.OnClickList
         edtBirthDate.setOnClickListener(this);
 
         Intent intent = getIntent();
-        idReceived = intent.getStringExtra(getData);
-        Log.d("AAAA","id1:"+String.valueOf(idReceived));
-
-        id_Received = Integer.parseInt(idReceived.toString());
-        Log.d("AAAA","id2:"+id_Received);
+        idReceived = intent.getStringExtra("userID");
+        id_Received = Integer.parseInt(idReceived);
         getUserData(urlGetData, id_Received);
+
+        btn_feedback.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                feedbackDialog = new Dialog(ChangeProfile.this);
+                feedbackDialog.setCanceledOnTouchOutside(false);
+
+            }
+        });
     }
     private void reflect(){
         edtFName = (EditText) findViewById(R.id.edt_firstName);
@@ -87,6 +103,7 @@ public class ChangeProfile extends AppCompatActivity implements View.OnClickList
         btnSave = (ImageButton) findViewById(R.id.btn_save);
         ava = (ImageView) findViewById(R.id.imgAva);
         txtEmail = (TextView) findViewById(R.id.text_email);
+        btn_feedback = (Button) findViewById(R.id.btn_dat);
     }
 
     private void getUserData(String url, final int id) {
@@ -99,7 +116,6 @@ public class ChangeProfile extends AppCompatActivity implements View.OnClickList
                             try {
                                 JSONObject object = response.getJSONObject(i);
                                 if (object.getInt("volunteer_id") == id) {
-                                    Log.d("ABC", String.valueOf(object.getInt("volunteer_id")));
                                     edtFName.setText(object.getString("volunteer_firstName"));
                                     edtLName.setText(object.getString("volunteer_lastName"));
                                     edtBirthDate.setText(object.getString("volunteer_birthDate"));
@@ -124,6 +140,7 @@ public class ChangeProfile extends AppCompatActivity implements View.OnClickList
         });
         requestQueue.add(jsonArrayRequest);
     }
+
     @Override
     public void onClick(View v) {
         switch (v.getId()){
@@ -158,43 +175,21 @@ public class ChangeProfile extends AppCompatActivity implements View.OnClickList
     private void upload(String url){
         final String gender = gd;
         final String fName = edtFName.getText().toString().trim();
-        Log.d("ABC",gd);
-        Log.d("BBB",fName);
         final String lName = edtLName.getText().toString().trim();
         final String job = edtJob.getText().toString().trim();
         final String birhtdate = edtBirthDate.getText().toString();
-//        if (edtFName.getText().toString().isEmpty() || edtLName.getText().toString().isEmpty() || edtJob.getText().toString().isEmpty() || edtBirthDate.getText().toString().isEmpty()) {
-//            Toast.makeText(getApplicationContext(), "You must type all inputs", Toast.LENGTH_SHORT).show();
-//            return;
-//        }
-//        if (NAME_PATTERN.matcher(fName).matches()) {
-//            Toast.makeText(getApplicationContext(), "Please enter a valid first name", Toast.LENGTH_SHORT).show();
-//            return;
-//        }
-//        if (NAME_PATTERN.matcher(lName).matches()) {
-//            Toast.makeText(getApplicationContext(), "Please enter a valid last name", Toast.LENGTH_SHORT).show();
-//            return;
-//        }
-//        if (NAME_PATTERN.matcher(job).matches()) {
-//            Toast.makeText(getApplicationContext(), "Please enter a valid job", Toast.LENGTH_SHORT).show();
-//            return;
-//        }
         RequestQueue requestQueue = Volley.newRequestQueue(this);
-        Log.d("123","1");
         StringRequest stringRequest = new StringRequest(Request.Method.POST,url ,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        Log.d("123","2");
                         if(response.trim() .equals("Success")){
-                            Log.d("123","3");
                             Toast.makeText(ChangeProfile.this, "Update complete", Toast.LENGTH_SHORT).show();
                         }
                     }
                 }, new Response.ErrorListener(){
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.d("123","4");
                     }
         }){
             @Override
@@ -211,44 +206,109 @@ public class ChangeProfile extends AppCompatActivity implements View.OnClickList
         };
         requestQueue.add(stringRequest);
     }
+    public void Showfeedback(View v){
+        feedbackDialog.setContentView(R.layout.feedback);
+
+        final ImageButton ibtn_sad;
+        final ImageButton ibtn_neutral;
+        final ImageButton ibtn_happy;
+        final EditText edt_fbContent;
+        ImageButton btn_sendFeedback;
+        TextView txt_close;
+
+        //Anh Xa - feedback dialog
+        txt_close = (TextView) feedbackDialog.findViewById(R.id.txt_close);
+        ibtn_sad = (ImageButton) feedbackDialog.findViewById(R.id.ibtn_sad);
+        ibtn_neutral = (ImageButton) feedbackDialog.findViewById(R.id.ibtn_normal);
+        ibtn_happy = (ImageButton) feedbackDialog.findViewById(R.id.ibtn_happy);
+        btn_sendFeedback = (ImageButton) feedbackDialog.findViewById(R.id.btn_sendFeedback);
+        edt_fbContent = (EditText) feedbackDialog.findViewById(R.id.edt_feedbackContent);
+
+        //event Đóng feedback
+        txt_close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                feedbackDialog.dismiss();
+            }
+        });
+
+        //set emotion from grey to yellow
+        ibtn_sad.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ibtn_sad.setImageResource(R.drawable.sad_red);
+                ibtn_neutral.setImageResource(R.drawable.neutral_grey);
+                ibtn_happy.setImageResource(R.drawable.happy_grey);
+                feedbackStatus="sad";
+            }
+        });
+        ibtn_neutral.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ibtn_neutral.setImageResource(R.drawable.neutral_yellow);
+                ibtn_sad.setImageResource(R.drawable.sad_grey);
+                ibtn_happy.setImageResource(R.drawable.happy_grey);
+                feedbackStatus="neutral";
+            }
+        });
+        ibtn_happy.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ibtn_happy.setImageResource(R.drawable.happy_blue);
+                ibtn_sad.setImageResource(R.drawable.sad_grey);
+                ibtn_neutral.setImageResource(R.drawable.neutral_grey);
+                feedbackStatus="happy";
+            }
+        });
+
+        //gọi phương thức send data feedback lên phpMyAdmin
+        btn_sendFeedback.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(feedbackStatus.isEmpty() && feedbackContent.isEmpty()){
+                    Toast.makeText(ChangeProfile.this,"Please input or choose",Toast.LENGTH_SHORT).show();
+                }else{
+                    feedbackContent = edt_fbContent.getText().toString().trim();
+                    insertFeedback(urlInsert);
+                }
+            }
+        });
+
+        feedbackDialog.show();
+    }
+
+    //method insert feedback to server phpMyAdmin
+    private void insertFeedback(String url){
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                if(response.trim().equals("success")){
+                    Toast.makeText(ChangeProfile.this,"Success",Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(ChangeProfile.this,"Fail",Toast.LENGTH_SHORT).show();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+            }
+        }){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Date today=new Date(System.currentTimeMillis());
+                SimpleDateFormat timeFormat= new SimpleDateFormat("dd/MM/yyyy");
+                String date = timeFormat.format(today.getTime());
+
+                Map<String,String> params = new HashMap<>();
+                params.put("feedback_status",feedbackStatus);
+                params.put("feedback_content",feedbackContent);
+                params.put("user_ID",idReceived);
+                params.put("feedback_date",date);
+                return params;
+            }
+        };
+        requestQueue.add(stringRequest);
+    }
 }
 
-
-//        request = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>() {
-//            @Override
-//            public void onResponse(String response) {
-//                try {
-//                    JSONObject jsonObject = new JSONObject(response);
-//                    if (jsonObject.names().get(0).equals("success")) {
-//                        Toast.makeText(getApplicationContext(), jsonObject.getString("success"), Toast.LENGTH_SHORT).show();
-//                    } else if (jsonObject.names().get(0).equals("error")) {
-//                        Toast.makeText(getApplicationContext(), jsonObject.getString("error"), Toast.LENGTH_SHORT).show();
-//                    } else {
-//                        Toast.makeText(getApplicationContext(), jsonObject.getString("type"), Toast.LENGTH_SHORT).show();
-//                    }
-//
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }, new Response.ErrorListener() {
-//            @Override
-//            public void onErrorResponse(VolleyError error) {
-//
-//            }
-//        }) {
-//            @Override
-//            protected Map<String, String> getParams() throws AuthFailureError {
-//                HashMap<String, String> hashMap = new HashMap<String, String>();
-//                hashMap.put("firstname", firstname.getText().toString());
-//                hashMap.put("lastname", lastname.getText().toString());
-//                hashMap.put("email", email.getText().toString().trim());
-//                hashMap.put("password", password.getText().toString());
-//
-//                return hashMap;
-//            }
-//        };
-//        requestQueue.add(request);
-//
-//    }
-//});
