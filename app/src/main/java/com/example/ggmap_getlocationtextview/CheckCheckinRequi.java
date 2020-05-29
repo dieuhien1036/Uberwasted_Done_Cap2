@@ -21,7 +21,7 @@ import org.json.JSONObject;
 public class CheckCheckinRequi extends AppCompatActivity implements View.OnClickListener {
     private double current_latitude;
     private double currennt_longtitude;
-    String urlGetData = "http://192.168.43.112/ub/getWaste.php";
+    String urlGetData = "http://192.168.43.54/ub/getWaste.php";
 
     //    Button btnclick ;
 //    private TextView tx;
@@ -41,14 +41,14 @@ public class CheckCheckinRequi extends AppCompatActivity implements View.OnClick
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btnclick: {
-                checkWasteForCheckin("http://192.168.43.112/ub/getWaste.php", current_latitude, currennt_longtitude);
+                checkWasteForCheckin("http://192.168.43.54/ub/getWaste.php", current_latitude, currennt_longtitude);
             }
         }
     }
 
-//    private void docDL(String url){
+//    private void docDL(String urlClassification){
 //        RequestQueue requestQueue = Volley.newRequestQueue(this);
-//        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null
+//        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, urlClassification, null
 //                , new Response.Listener<JSONArray>() {
 //            @Override
 //            public void onResponse(JSONArray response) {
@@ -106,7 +106,7 @@ public class CheckCheckinRequi extends AppCompatActivity implements View.OnClick
 //        @Override
 //        protected String doInBackground(String... strings) {
 //            okhttp3.Request.Builder builder = new okhttp3.Request.Builder();
-//            builder.url(strings[0]);
+//            builder.urlClassification(strings[0]);
 //            Request request = builder.build();
 //            try {
 //                Response response = okHttpClient.newCall(request).execute();

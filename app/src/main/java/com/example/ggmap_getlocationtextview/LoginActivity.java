@@ -34,7 +34,7 @@ public class LoginActivity extends AppCompatActivity {
     LinearLayout linearLayout;
     Button btn_ForgotPassword;
     Button btn_Register;
-    String url ="http://192.168.43.112/androidwebservice/login.php";
+    String url ="http://192.168.43.54/androidwebservice/login.php";
     SharedPreferences sharedPreferences;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +64,6 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(LoginActivity.this,ForgotActivity.class);
-                Log.e("Dat ngu","Hien dep");
                 startActivity(intent);
             }
         });
@@ -106,7 +105,7 @@ public class LoginActivity extends AppCompatActivity {
                 for(int i = 0; i < response.length(); i++){
                     try {
                         JSONObject object = response.getJSONObject(i);
-                        Log.e("BBB","Vao day");
+
                         String email = object.getString("volunteer_email");
                         String password = object.getString("volunteer_password");
                         String userID = object.getString("volunteer_id");
@@ -116,10 +115,8 @@ public class LoginActivity extends AppCompatActivity {
                         String userJob = object.getString("volunteer_job");
                         String userGender  = object.getString("volunteer_gender");
                         String userScore = object.getString("volunteer_score");
-                        Log.e("BBB1",email + " " + password +" "+userID);
-                        Log.e("md5",getMd5(edt_Pass.getText().toString()));
-                        Log.e("l",String.valueOf(response.length()));
-                        if(email.equals(edt_Email.getText().toString().trim()) == true && password.equals(getMd5(edt_Pass.getText().toString())) == true){
+
+                        if(email.equals(edt_Email.getText().toString().trim()) == true && password.equals(edt_Pass.getText().toString()) == true){
 
                             SharedPreferences.Editor editor = sharedPreferences.edit();
                             editor.remove("email");

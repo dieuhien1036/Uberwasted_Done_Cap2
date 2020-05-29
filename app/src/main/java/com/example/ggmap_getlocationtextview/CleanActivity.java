@@ -32,9 +32,9 @@ public class CleanActivity extends AppCompatActivity {
     ListView listView;
     AdapterListView adapterListView;
     joinDialog.BottomSheetListener mListener;
-    String urlDelete = "http://192.168.43.112/androidwebservice/deleteJoin.php";
-    String url = "http://192.168.43.112/androidwebservice/WasteJoin.php";
-    String urlCheckin = "http://192.168.43.112/androidwebservice/checkIn.php";
+    String urlDelete = "http://192.168.43.54/androidwebservice/deleteJoin.php";
+    String url = "http://192.168.43.54/androidwebservice/WasteJoin.php";
+    String urlCheckin = "http://192.168.43.54/androidwebservice/checkIn.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +55,7 @@ public class CleanActivity extends AppCompatActivity {
             @Override
             public void onResponse(String response) {
                 if (response.trim().equals("success")) {
-                    Toast.makeText(CleanActivity.this, "Cancxel Success!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(CleanActivity.this, "Cancel Success!", Toast.LENGTH_SHORT).show();
                     getDataJoinID(url);
                 } else {
                     Toast.makeText(CleanActivity.this, "Cancel Fail. Please confirm again!", Toast.LENGTH_SHORT).show();

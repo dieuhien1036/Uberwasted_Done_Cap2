@@ -1,6 +1,7 @@
 package com.example.ggmap_getlocationtextview;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -69,8 +70,8 @@ public class Checkin extends AppCompatActivity implements  View.OnClickListener{
     BufferedReader bufferedReader;
     StringBuilder stringBuilder;
     boolean check = true;
-    String urlCheckin = "http://192.168.43.112/ub/checkin.php";
-    String urlGetJoin = "http://192.168.43.112/ub/getJoin.php";
+    String urlCheckin = "http://192.168.43.54/ub/checkin.php";
+    String urlGetJoin = "http://192.168.43.54/ub/getJoin.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -207,11 +208,11 @@ public class Checkin extends AppCompatActivity implements  View.OnClickListener{
             case R.id.btn_checkin : {
 
                 UploadImageToServer(codeCheck, "Image"+codeCheck);
-//                Intent intent = new Intent();
- /*               Intent returnIntent = getIntent();
+                Intent intent = new Intent();
+                Intent returnIntent = getIntent();
                 returnIntent.putExtra("result","ok");
                 setResult(Activity.RESULT_OK,returnIntent);
-                finish();*/
+                finish();
                 break;
             }
             case R.id.imageCheckin : {

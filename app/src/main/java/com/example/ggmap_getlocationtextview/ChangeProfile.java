@@ -52,12 +52,12 @@ public class ChangeProfile extends AppCompatActivity implements View.OnClickList
     private TextView txtEmail;
     private ImageButton btnSave;
     private Dialog feedbackDialog;
-    private String urlInsert = "http://192.168.43.112/androidwebservice/feedback.php";
+    private String urlInsert = "http://192.168.43.54/androidwebservice/feedback.php";
     private String feedbackStatus="";
     private String feedbackContent="";
     private ImageView ava;
-    private String urlGetData = "http://192.168.43.112/ub/getUser.php";
-    private String urlUpload = "http://192.168.43.112/ub/updateProfile.php";
+    private String urlGetData = "http://192.168.43.54/ub/getUser.php";
+    private String urlUpload = "http://192.168.43.54/ub/updateProfile.php";
     private String idReceived;
 
     private static final Pattern NAME_PATTERN =
@@ -125,8 +125,8 @@ public class ChangeProfile extends AppCompatActivity implements View.OnClickList
                                     } else
                                         rbFemale.setChecked(true);
                                     txtEmail.setText(object.getString("volunteer_email"));
+                                    Toast.makeText(ChangeProfile.this, "Load dữ liệu thành công", Toast.LENGTH_SHORT).show();
                                 }
-                                Toast.makeText(ChangeProfile.this, "Load dữ liệu thành công", Toast.LENGTH_SHORT).show();
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }

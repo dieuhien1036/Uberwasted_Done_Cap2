@@ -40,10 +40,9 @@ public class JoinActivity extends AppCompatActivity {
     int wasteID;
     String waste_address;
     //String urlString = (String) getText(R.string.hienngu);
-    String wasteURL = "http://192.168.43.112/androidwebservice/wasteLocation.php";
-    String insertJoinURL ="http://192.168.43.112/androidwebservice/insertJoin.php";
-    String urlWasteJoin = "http://192.168.43.112/androidwebservice/WasteJoin.php";
-    Boolean OK = false;
+    String wasteURL = "http://192.168.43.54/androidwebservice/wasteLocation.php";
+    String insertJoinURL ="http://192.168.43.54/androidwebservice/insertJoin.php";
+    String urlWasteJoin = "http://192.168.43.54/androidwebservice/WasteJoin.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,7 +106,7 @@ public class JoinActivity extends AppCompatActivity {
                         int waste_id = object.getInt("waste_id");
                         String volunteer_id = object.getString("volunteer_id");
                         if(wasteID == waste_id &&  userID.equals(volunteer_id)){
-                            Toast.makeText(JoinActivity.this, "This join is not join", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(JoinActivity.this, "This address can not join", Toast.LENGTH_SHORT).show();
                             return;
                         }
                     } catch (JSONException e) {

@@ -41,7 +41,7 @@ public class joinDialog extends BottomSheetDialogFragment implements DirectionFi
     private TextView txt_size;
     private TextView txt_people;
     public static final int MY_REQUEST_CODE = 100;
-    private String URL = "http://192.168.43.112/upload/uploads/";
+    private String URL = "http://192.168.43.54/upload/uploads/";
 
     @Nullable
     @Override
@@ -68,8 +68,7 @@ public class joinDialog extends BottomSheetDialogFragment implements DirectionFi
         final String userJob = getArguments().getString("userJob");
         final String userGender = getArguments().getString("gender");
         final String waste_image = getArguments().getString("waste_image").trim();
-        Log.e("CheckABC1",   userID +"-"
-                +dateOfBirth+"-"+userJob+"-"+userGender+"-"+userScore);
+
         currentLatitude = getArguments().getDouble("currentLatitude",0);
         currentLongtitude = getArguments().getDouble("currentLongtitude",0);
         wasteLatitude = getArguments().getDouble("wasteLatitude",0);

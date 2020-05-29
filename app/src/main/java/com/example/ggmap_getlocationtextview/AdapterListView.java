@@ -148,7 +148,6 @@ public class AdapterListView extends BaseAdapter {
 
             @Override
             public void onResponse(JSONArray response) {
-                Log.e("Khac ngu",position+"");
                 for (int i = 0; i < response.length(); i++) {
                     try {
                         JSONObject object = response.getJSONObject(i);
@@ -166,7 +165,7 @@ public class AdapterListView extends BaseAdapter {
 
                 }
                 if(OK == false){
-                    Toast.makeText(context, "Khong Checkout duoc", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Can not checkout now!", Toast.LENGTH_SHORT).show();
                 }
             }
         }, new Response.ErrorListener() {

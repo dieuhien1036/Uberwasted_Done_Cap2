@@ -78,8 +78,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     String userGender  = null;
     String userID = null;
     String userScore = null;
-    String url = "http://192.168.43.112/androidwebservice/wasteLocation.php";
-    String getWasteJoinURL ="http://192.168.43.112/androidwebservice/WasteJoin.php";
+    String url = "http://192.168.43.54/androidwebservice/wasteLocation.php";
+    String getWasteJoinURL ="http://192.168.43.54/androidwebservice/WasteJoin.php";
     String wasteID = null;
 
     @Override
@@ -436,7 +436,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     double wasteLocation_latitude = Double.parseDouble(object.getString("waste_latitude"));
                                     double wasteLocation_longtitude = Double.parseDouble(object.getString("waste_longtitude"));
                                     if(wasteLocation_latitude == m.getPosition().latitude && wasteLocation_longtitude == m.getPosition().longitude){
-                                        String waste_people = object.getString("waste_people");
+                                        String waste_people = object.getString("waste_biod");
                                         String waste_size = object.getString("waste_size");
                                         String waste_image = object.getString("waste_image");
                                         bundle.putString("waste_people", waste_people);

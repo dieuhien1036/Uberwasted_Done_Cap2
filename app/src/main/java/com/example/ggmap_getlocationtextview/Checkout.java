@@ -74,7 +74,7 @@ public class Checkout extends AppCompatActivity implements View.OnClickListener{
     String TextProcess = "process";
     String TextCheckin_id = "checkin_id";
     String TextSize = "size";
-    String TextPeople = "people";
+    String TextPeople = "biod";
     String TextMaterial = "material";
 
     ByteArrayOutputStream byteArrayOutputStream;
@@ -92,10 +92,10 @@ public class Checkout extends AppCompatActivity implements View.OnClickListener{
     boolean check = true;
     private SeekBar sk_process;
     private TextView txt_process;
-    String urlCheckout = "http://192.168.43.112/ub/checkout.php";
-    String urlGetCheckinId = "http://192.168.43.112/ub/getCheckinId.php";
-    String urlGetWasteData= "http://192.168.43.112/ub/getWaste.php";
-    String urlUpdateScore = "http://192.168.43.112/ub/score.php";
+    String urlCheckout = "http://192.168.43.54/ub/checkout.php";
+    String urlGetCheckinId = "http://192.168.43.54/ub/getCheckinId.php";
+    String urlGetWasteData= "http://192.168.43.54/ub/getWaste.php";
+    String urlUpdateScore = "http://192.168.43.54/ub/score.php";
     private String  checkinID = "0";
 
     @Override
@@ -106,8 +106,6 @@ public class Checkout extends AppCompatActivity implements View.OnClickListener{
         Intent intent = getIntent();
         volunteerId_Received = Integer.parseInt(intent.getStringExtra("userID"));
         wasteId_Received = Integer.parseInt(intent.getStringExtra("wasteID"));
-        Log.e("Hien!",volunteerId_Received+"");
-        Log.e("Hien!",wasteId_Received+"");
         getCheckinID(urlGetCheckinId,wasteId_Received,volunteerId_Received);
         getWasteData(urlGetWasteData, wasteId_Received);
         byteArrayOutputStream = new ByteArrayOutputStream();
@@ -399,9 +397,10 @@ public class Checkout extends AppCompatActivity implements View.OnClickListener{
                                 if (object.getInt("waste_id") == waste_id) {
                                         txt_material.setText(object.getString("waste_material"));
                                         txt_size.setText(String.valueOf(object.getString("waste_size")));
-                                        txt_people.setText(String.valueOf(object.getInt("waste_people")));
+                                        txt_people.setText(String.valueOf(object.getInt("waste_biod")));
+                                    Toast.makeText(Checkout.this, "Load dữ liệu thành công", Toast.LENGTH_SHORT).show();
+
                                 }
-                                Toast.makeText(Checkout.this, "Load dữ liệu thành công", Toast.LENGTH_SHORT).show();
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -449,8 +448,6 @@ public class Checkout extends AppCompatActivity implements View.OnClickListener{
         String scoreRank = "0";
         if(rank.equals("Small"))
             scoreRank = "5";
-        else if(rank.equals("Medium"))
-            scoreRank = "10";
         else
             scoreRank ="20";
         Log.d("AAB",scoreRank);

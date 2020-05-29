@@ -1,6 +1,5 @@
 package com.example.ggmap_getlocationtextview;
 
-
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -36,11 +35,11 @@ import com.android.volley.toolbox.Volley;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import net.gotev.uploadservice.MultipartUploadRequest;
-import net.gotev.uploadservice.UploadNotificationConfig;
 import net.gotev.uploadservice.UploadServiceBroadcastReceiver;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.opencv.android.OpenCVLoader;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -56,20 +55,34 @@ import java.util.UUID;
 public class ReportActivity extends AppCompatActivity
 //       implements View.OnClickListener
 {
+    private final  String cardboard_big = "cardboard_big_biod";
+    private final  String cardboard_small = "cardboard_small_biod";
+    private final  String metal_big = "metal_big_nonbiod";
+        private final  String metal_small = "metal_small_nonbiod";
+    private final  String plastic_big = "plastic_big_nonbiod";
+    private final  String plastic_small = "plastic_small_nonbiod";
+    private final  String glass_big = "glass_big_nonbiod";
+    private final  String glass_small = "glass_small_nonbiod";
+    private final  String big_size = "big";
+    private final  String small_size = "small";
+    private final  String biod_type = "biod";
+    private final  String noBiod_type = "non biod";
+
+
     private static String JSON_STRING;
-    private static final String UPLOAD_URL = "http://192.168.43.112/upload/insert_image.php";
+    private static final String UPLOAD_URL = "http://192.168.43.54/upload/upload_to_server.php";
     private static final int IMAGE_REQUEST_CODE = 3;
     private static final int STORAGE_PERMISSION_CODE = 123;
     private ImageView imageView;
-    private String size;
-    private EditText etCaption;
+    private String size = "small";
+    private String biod = "biod";
+    private String folder = "cardboard_big_biod";
     private TextView tvPath, tvIdmax;
     private ImageButton btnReport;
     private Bitmap bitmap;
     private Uri filePath;
-    private RadioButton radioButton_Small, radioButton_Medium, radioButton_Large;
+    private RadioButton radioButton_Small, radioButton_Large, radioButton_biod, radioButton_nobiod;
     private EditText etMaterial;
-    private EditText etNumberOfPeople;
     private double latitude, longtitude;
     private String addressWaste;
 
@@ -97,41 +110,25 @@ public class ReportActivity extends AppCompatActivity
         btnReport.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendFCMPush();
-                uploadMultipart();
-
+                uploadImageToServer();
             }
         });
 
+        OpenCVLoader.initDebug();
     }
 
     private void reflect() {
-        //id = tvIdmax.getText().toString();
         imageView = (ImageView) findViewById(R.id.image);
-        etCaption = (EditText) findViewById(R.id.etCaption);
         etMaterial = findViewById(R.id.etMaterial);
-        etNumberOfPeople = findViewById(R.id.etNumberOfPeople);
         tvPath = (TextView) findViewById(R.id.path);
         radioButton_Small = findViewById(R.id.radioButton_Small);
-        radioButton_Medium = findViewById(R.id.radioButton_Medium);
         radioButton_Large = findViewById(R.id.radioButton_Large);
+        radioButton_biod = findViewById(R.id.radioButton_biod);
+        radioButton_nobiod = findViewById(R.id.radioButton_nonbiod);
         btnReport = findViewById((R.id.btnReport));
         tvIdmax = findViewById(R.id.idmax);
     }
 
-    //    @Override
-//    public void onClick(View view) {
-//        sendFCMPush();
-//        if (view == imageView) {
-//            Intent intent = new Intent();
-//            intent.setType("image/*");
-//            intent.setAction(Intent.ACTION_GET_CONTENT);
-//            startActivityForResult(Intent.createChooser(intent, "Complete action using"), IMAGE_REQUEST_CODE);
-//        } else if (view == btnReport) {
-//            uploadMultipart();
-//
-//        }
-//    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -142,7 +139,7 @@ public class ReportActivity extends AppCompatActivity
                 tvPath.setText("Path: ".concat(getPath(filePath)));
                 imageView.setImageBitmap(bitmap);
                 //XU LY TAI DAY
-                uploadMultipart1();
+                updateImageWasteForClassification();
                 Toast.makeText(this, "Loading recommend please wait...", Toast.LENGTH_SHORT).show();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -150,11 +147,10 @@ public class ReportActivity extends AppCompatActivity
         }
     }
 
-    public void uploadMultipart1() {
-        String url = "http://192.168.43.112/upload/insert_image1.php";
+    public void updateImageWasteForClassification() {
+        String url = "http://192.168.43.54/upload/upload_for_compare.php";
+        String caption = " ";
 
-        String caption = etCaption.getText().toString().trim();
-        //String size=etSize.getText().toString().trim();
         //getting the actual path of the image
         String path = getPath(filePath);
         Intent intent = getIntent();
@@ -164,23 +160,22 @@ public class ReportActivity extends AppCompatActivity
         //Uploading code
         try {
             String uploadId = UUID.randomUUID().toString();
-            //Creating a multi part request
+            //Creating a multi part requestẽ
             new MultipartUploadRequest(this, uploadId, url)
                     .addFileToUpload(path, "image") //Adding file
-                    .addParameter("caption", caption) //Adding text parameter to the request
+                    .addParameter("size", size) //Adding text parameter to the request
                     .addParameter("wasteLocation_longtitude", String.valueOf(longtitude))
                     .addParameter("wasteLocation_latitude", String.valueOf(latitude))
                     .addParameter("wasteLocation_address", String.valueOf(addressWaste))
-                    .setNotificationConfig(new UploadNotificationConfig())
+//                    .setNotificationConfig(new UploadNotificationConfig())
                     .setMaxRetries(2)
                     .startUpload(); //Starting the upload
         } catch (Exception exc) {
-            //Toast.makeText(this, exc.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
 
-    public void uploadMultipart() {
+    public void uploadImageToServer() {
         long millis = System.currentTimeMillis();
         java.sql.Date date = new java.sql.Date(millis);
         Intent intent = getIntent();
@@ -189,18 +184,63 @@ public class ReportActivity extends AppCompatActivity
         addressWaste = intent.getStringExtra("wasteLocation_address");
 
         if (radioButton_Small.isChecked()) {
-            size = "Small";
-        }
-        if (radioButton_Medium.isChecked()) {
-            size = "Medium";
+            size = small_size;
         }
         if (radioButton_Large.isChecked()) {
-            size = "Big";
+            size = big_size;
         }
-        String caption = etCaption.getText().toString().trim();
-        //String size=etSize.getText().toString().trim();
+
+        if (radioButton_biod.isChecked()) {
+            biod = biod_type;
+        }
+        if (radioButton_nobiod.isChecked()) {
+            biod = noBiod_type;
+        }
         String material = etMaterial.getText().toString().trim();
-        String people = etNumberOfPeople.getText().toString().trim();
+
+        switch (size) {
+            case big_size : {
+                switch (material) {
+                    case "cardboard" : {
+                        folder = cardboard_big;
+                        break;
+                    }
+                    case "metal" : {
+                        folder = metal_big;
+                        break;
+                    }
+                    case "glass" : {
+                        folder = glass_big;
+                        break;
+                    }
+                    case "plastic" : {
+                        folder = plastic_big;
+                    }
+                }
+                break;}
+            case small_size : {
+                switch (material) {
+                    case "cardboard" : {
+                        folder = cardboard_small;
+                        break;
+                    }
+                    case "metal" : {
+                        folder = metal_small;
+                        break;
+                    }
+                    case "glass" : {
+                        folder = glass_small;
+                        break;
+                    }
+                    case "plastic" : {
+                        folder = plastic_small;
+                    }
+                }
+                break;}
+            default: {
+            }
+        }
+
         //getting the actual path of the image
         String path = getPath(filePath);
 
@@ -210,15 +250,15 @@ public class ReportActivity extends AppCompatActivity
             //Creating a multi part request
             new MultipartUploadRequest(this, uploadId, UPLOAD_URL)
                     .addFileToUpload(path, "image") //Adding file
-                    .addParameter("caption", caption) //Adding text parameter to the request
+                    .addParameter("file_folder", folder)
                     .addParameter("size", size)
                     .addParameter("material", material)
-                    .addParameter("people", people)
+                    .addParameter("biod", biod)
                     .addParameter("wasteLocation_longtitude", String.valueOf(longtitude))
                     .addParameter("wasteLocation_latitude", String.valueOf(latitude))
                     .addParameter("wasteLocation_address", String.valueOf(addressWaste))
                     .addParameter("waste_date", String.valueOf(date))
-                    .setNotificationConfig(new UploadNotificationConfig())
+//                    .setNotificationConfig(new UploadNotificationConfig())
                     .setMaxRetries(2)
                     .startUpload(); //Starting the upload
             Intent intentBackMap = new Intent(ReportActivity.this, MapsActivity.class);
@@ -236,9 +276,9 @@ public class ReportActivity extends AppCompatActivity
         @Override
         public void onCompleted(String uploadId, int serverResponseCode, byte[] serverResponseBody) {
             super.onCompleted(uploadId, serverResponseCode, serverResponseBody);
-            getPeople();
-            getSize();
-            getMaterial();
+//            getPeople();
+//            getSize();
+            getResult();
             //Intent intentBackMap=new Intent(ReportActivity.this, MapsActivity.class);
             //startActivity(intentBackMap);
         }
@@ -305,26 +345,16 @@ public class ReportActivity extends AppCompatActivity
 
     }
 
-    public void getPeople() {
-        new docSoNguoi().execute();
+    public void getResult() {
+        new readWaste().execute();
     }
 
-    public void getMaterial() {
-        new docChatLieu().execute();
-    }
-
-    public void getSize() {
-        new docSize().execute();
-    }
-
-
-    public class docSoNguoi extends AsyncTask<Void, Void, String> {
-
+    public class readWaste extends AsyncTask<Void, Void, String> {
         String url;
 
         @Override
         protected void onPreExecute() {
-            url = "http://192.168.43.112/upload/getPeople.php";
+            url = "http://192.168.43.54/upload/getMaterial.php";
         }
 
         @Override
@@ -357,100 +387,17 @@ public class ReportActivity extends AppCompatActivity
 
         @Override
         protected void onPostExecute(String result) {
-            etNumberOfPeople.setText(result);
-        }
-    }
-
-    public class docChatLieu extends AsyncTask<Void, Void, String> {
-
-        String url;
-
-        @Override
-        protected void onPreExecute() {
-            url = "http://192.168.43.112/upload/getMaterial.php";
-        }
-
-        @Override
-        protected String doInBackground(Void... voids) {
-            try {
-                URL url1 = new URL(url);
-                HttpURLConnection httpURLConnection = (HttpURLConnection) url1.openConnection();
-                InputStream inputStream = httpURLConnection.getInputStream();
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                StringBuilder stringBuilder = new StringBuilder();
-                while ((JSON_STRING = bufferedReader.readLine()) != null) {
-                    stringBuilder.append(JSON_STRING + "\n");
-                }
-                bufferedReader.close();
-                inputStream.close();
-                httpURLConnection.disconnect();
-                return stringBuilder.toString().trim();
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onProgressUpdate(Void... values) {
-            super.onProgressUpdate(values);
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            etMaterial.setText(result);
-        }
-    }
-
-    public class docSize extends AsyncTask<Void, Void, String> {
-
-        String url;
-
-        @Override
-        protected void onPreExecute() {
-            url = "http://192.168.43.112/upload/getSize.php";
-        }
-
-        @Override
-        protected String doInBackground(Void... voids) {
-            try {
-                URL url1 = new URL(url);
-                HttpURLConnection httpURLConnection = (HttpURLConnection) url1.openConnection();
-                InputStream inputStream = httpURLConnection.getInputStream();
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                StringBuilder stringBuilder = new StringBuilder();
-                while ((JSON_STRING = bufferedReader.readLine()) != null) {
-                    stringBuilder.append(JSON_STRING + "\n");
-                }
-                bufferedReader.close();
-                inputStream.close();
-                httpURLConnection.disconnect();
-                return stringBuilder.toString().trim();
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onProgressUpdate(Void... values) {
-            super.onProgressUpdate(values);
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            if (result.equals("Small")) {
+            String[] wasteResult = result.split("_");
+            etMaterial.setText(wasteResult[0]);
+            if (wasteResult[1].equals("big")) {
+                radioButton_Large.setChecked(true);
+            } else {
                 radioButton_Small.setChecked(true);
             }
-            if (result.equals("Medium")) {
-                radioButton_Medium.setChecked(true);
-            }
-            if (result.equals("Big")) {
-                radioButton_Large.setChecked(true);
+            if (wasteResult[2].contains("nonbiod")) {
+                radioButton_nobiod.setChecked(true);
+            } else {
+                radioButton_biod.setChecked(true);
             }
         }
     }
@@ -524,7 +471,6 @@ public class ReportActivity extends AppCompatActivity
         addressWaste = intent.getStringExtra("wasteLocation_address");
         MapsActivity m = new MapsActivity();
         final String SERVER_KEY = "AAAA5X8ZDBE:APA91bHDkSbJW0In5hLU_8mOwP9zhNuD_E3WzYi8-0W0UT_rAdIPy3HrmaxNlP__KjmipMjaaJ08AqQeB591ynOeMEKj2k31e-bm1y1jFUq_HvhonynWJkJVEjoR6DojXts2MTtM_AQB";
-        Log.e("cccccc", String.valueOf(addressWaste));
         String title = "Uber";
         String msg = "Have new waste near " + String.valueOf(addressWaste);
         String token = "epcG9vI67-E:APA91bFZH6i48Tm_6i2Ykf30JmHFjP0_rcv2Emqyc0ekk8GXTV4LtSc8DgxsjMrPJCJLnBqQBqRbGEzY7CuNYmIUwVgS1A0uTRUJgFRp_3O3-mYpYy4L4LaVGQi1XTVv1leadOuhEFJc";
@@ -586,6 +532,4 @@ public class ReportActivity extends AppCompatActivity
         requestQueue.add(jsObjRequest);
         FirebaseMessaging.getInstance().subscribeToTopic("allDevices");
     }
-
 }
-

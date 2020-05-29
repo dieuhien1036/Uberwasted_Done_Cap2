@@ -40,7 +40,7 @@ import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 
 public class testCame extends AppCompatActivity {
-    final String urlCheckin = "http://192.168.43.112/ub/checkin.php";
+    final String urlCheckin = "http://192.168.43.54/ub/checkin.php";
     Button GetImageFromGalleryButton, UploadImageOnServerButton;
 
     ImageView ShowSelectedImage;
