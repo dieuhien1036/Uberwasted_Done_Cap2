@@ -31,7 +31,7 @@ public class PasswordChanger extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.passwordchanger);
-        urlUpdate = "http://192.168.43.54/Donjudgeplz/forgot.php";
+        urlUpdate = "http://10.10.51.193/Donjudgeplz/forgot.php";
         btnSend = this.findViewById(R.id.btn_Change);
         etNewpassword = this.findViewById(R.id.et_Newpassword);
         etRenewpassword = this.findViewById(R.id.et_Renewpassword);

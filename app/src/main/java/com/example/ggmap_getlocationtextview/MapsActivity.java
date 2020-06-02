@@ -1,6 +1,7 @@
 package com.example.ggmap_getlocationtextview;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -75,11 +76,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     String username = null;
     String dateOfBirth = null;
     String userJob = null;
-    String userGender  = null;
+    String userGender = null;
     String userID = null;
     String userScore = null;
-    String url = "http://192.168.43.54/androidwebservice/wasteLocation.php";
-    String getWasteJoinURL ="http://192.168.43.54/androidwebservice/WasteJoin.php";
+    String url = "http://10.10.51.193/androidwebservice/wasteLocation.php";
+    String getWasteJoinURL = "http://10.10.51.193/androidwebservice/WasteJoin.php";
     String wasteID = null;
 
     @Override
@@ -114,23 +115,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ibtn_clean.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MapsActivity.this,CleanActivity.class);
-                intent.putExtra("userID",userID);
+                Intent intent = new Intent(MapsActivity.this, CleanActivity.class);
+                intent.putExtra("userID", userID);
                 startActivity(intent);
             }
         });
     }
 
-    private void ranking(){
+    private void ranking() {
         ibtn_rank.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MapsActivity.this,Ranking.class);
+                Intent intent = new Intent(MapsActivity.this, Ranking.class);
                 startActivity(intent);
             }
         });
     }
-    private void getDataJoinID(String url){
+
+    private void getDataJoinID(String url) {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
@@ -141,7 +143,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         double wasteJoinLat = object.getDouble("waste_latitude");
                         double wasteJoinLong = object.getDouble("waste_longtitude");
                         String volunteer_id = object.getString("volunteer_id");
-                        if(volunteer_id.equals(userID)) {
+                        if (volunteer_id.equals(userID)) {
                             for (int j = 0; j < markerWasteList.size(); j++) {
                                 if (markerWasteList.get(j).getPosition().latitude == wasteJoinLat
                                         && markerWasteList.get(j).getPosition().longitude == wasteJoinLong) {
@@ -164,8 +166,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         requestQueue.add(jsonArrayRequest);
     }
 
-    private void location(){
+    @SuppressLint("MissingPermission")
+    private void location() {
         LatLng latLng = new LatLng(currentLatitude, currentLongtitude);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
         mMap.setMyLocationEnabled(true);
         //Set blue point  == true
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
@@ -507,5 +520,4 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
     }
-
 }
