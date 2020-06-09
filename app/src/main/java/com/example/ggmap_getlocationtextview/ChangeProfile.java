@@ -52,12 +52,12 @@ public class ChangeProfile extends AppCompatActivity implements View.OnClickList
     private TextView txtEmail;
     private ImageButton btnSave;
     private Dialog feedbackDialog;
-    private String urlInsert = "http://10.10.51.193/androidwebservice/feedback.php";
+    private String urlInsert = "http://192.168.1.4/androidwebservice/feedback.php";
     private String feedbackStatus="";
     private String feedbackContent="";
     private ImageView ava;
-    private String urlGetData = "http://10.10.51.193/ub/getUser.php";
-    private String urlUpload = "http://10.10.51.193/ub/updateProfile.php";
+    private String urlGetData = "http://192.168.1.4/ub/getUser.php";
+    private String urlUpload = "http://192.168.1.4/ub/updateProfile.php";
     private String idReceived;
 
     private static final Pattern NAME_PATTERN =

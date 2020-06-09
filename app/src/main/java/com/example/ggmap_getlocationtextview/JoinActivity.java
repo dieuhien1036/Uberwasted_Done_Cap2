@@ -40,9 +40,9 @@ public class JoinActivity extends AppCompatActivity {
     int wasteID;
     String waste_address;
     //String urlString = (String) getText(R.string.hienngu);
-    String wasteURL = "http://10.10.51.193/androidwebservice/wasteLocation.php";
-    String insertJoinURL ="http://10.10.51.193/androidwebservice/insertJoin.php";
-    String urlWasteJoin = "http://10.10.51.193/androidwebservice/WasteJoin.php";
+    String wasteURL = "http://192.168.1.4/androidwebservice/wasteLocation.php";
+    String insertJoinURL ="http://192.168.1.4/androidwebservice/insertJoin.php";
+    String urlWasteJoin = "http://192.168.1.4/androidwebservice/WasteJoin.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

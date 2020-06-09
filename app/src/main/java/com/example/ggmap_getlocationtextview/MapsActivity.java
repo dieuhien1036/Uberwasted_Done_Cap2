@@ -39,7 +39,11 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -79,8 +83,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     String userGender = null;
     String userID = null;
     String userScore = null;
-    String url = "http://10.10.51.193/androidwebservice/wasteLocation.php";
-    String getWasteJoinURL = "http://10.10.51.193/androidwebservice/WasteJoin.php";
+    String url = "http://192.168.1.4/androidwebservice/wasteLocation.php";
+    String getWasteJoinURL = "http://192.168.1.4/androidwebservice/WasteJoin.php";
     String wasteID = null;
 
     @Override
@@ -120,6 +124,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 startActivity(intent);
             }
         });
+
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        if (!task.isSuccessful()) {
+                            Log.d("ABC", "getInstanceId failed", task.getException());
+                            return;
+                        }
+
+                        // Get new Instance ID token
+                        String token = task.getResult().getToken();
+                        Log.d("ABC123", token);
+                    }
+                });
+
     }
 
     private void ranking() {
@@ -185,15 +205,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //Set location at LatLng ( user's current location)
         mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
         //Zoom in street
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,17));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17));
     }
 
-    private void account(){
+    private void account() {
         ibtn_account.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MapsActivity.this,ChangeProfile.class);
-                intent.putExtra("userID",userID);
+                Intent intent = new Intent(MapsActivity.this, ChangeProfile.class);
+                intent.putExtra("userID", userID);
                 startActivity(intent);
             }
         });
@@ -214,9 +234,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
                 Intent intent = new Intent(MapsActivity.this, ReportActivity.class);
-                intent.putExtra("wasteLocation_latitude",currentLatitude);
-                intent.putExtra("wasteLocation_longtitude",currentLongtitude);
-                intent.putExtra("wasteLocation_address",addressWaste);
+                intent.putExtra("wasteLocation_latitude", currentLatitude);
+                intent.putExtra("wasteLocation_longtitude", currentLongtitude);
+                intent.putExtra("wasteLocation_address", addressWaste);
 
                 startActivity(intent);
 
@@ -288,7 +308,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //Set location at LatLng ( user's current location)
         mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
         //Zoom in street
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,17));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17));
 
         //
         joinDialog(url);
@@ -296,7 +316,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     //get waste Marker from database into MAP
-    private void getLocation(String url){
+    private void getLocation(String url) {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
@@ -304,19 +324,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 for (int i = 0; i < response.length(); i++) {
                     try {
                         JSONObject object = response.getJSONObject(i);
-                            double wasteLocation_latitude = Double.parseDouble(object.getString("waste_latitude"));
-                            double wasteLocation_longtitude = Double.parseDouble(object.getString("waste_longtitude"));
-                            LatLng latLng = new LatLng(wasteLocation_latitude, wasteLocation_longtitude);
-                            Geocoder geocoder = new Geocoder(getApplicationContext());
-                            try {
-                                List<Address> addressList = geocoder.getFromLocation(wasteLocation_latitude, wasteLocation_longtitude, 1);
-                                String str = addressList.get(0).getAddressLine(0);
-                                markerWaste = mMap.addMarker(new MarkerOptions().position(latLng).title(str));
-                                markerWasteList.add(markerWaste);
+                        double wasteLocation_latitude = Double.parseDouble(object.getString("waste_latitude"));
+                        double wasteLocation_longtitude = Double.parseDouble(object.getString("waste_longtitude"));
+                        LatLng latLng = new LatLng(wasteLocation_latitude, wasteLocation_longtitude);
+                        Geocoder geocoder = new Geocoder(getApplicationContext());
+                        try {
+                            List<Address> addressList = geocoder.getFromLocation(wasteLocation_latitude, wasteLocation_longtitude, 1);
+                            String str = addressList.get(0).getAddressLine(0);
+                            markerWaste = mMap.addMarker(new MarkerOptions().position(latLng).title(str));
+                            markerWasteList.add(markerWaste);
 
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -325,13 +345,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(MapsActivity.this,error.toString(),Toast.LENGTH_SHORT).show();
+                Toast.makeText(MapsActivity.this, error.toString(), Toast.LENGTH_SHORT).show();
             }
         });
         requestQueue.add(jsonArrayRequest);
     }
 
-    private void reflect(){
+    private void reflect() {
         searchViewLocation = (SearchView) findViewById(R.id.svLocation);
         btn_location = (ImageButton) findViewById(R.id.btn_location);
         ibtn_report = (ImageButton) findViewById(R.id.ibtn_report);
@@ -341,7 +361,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         txt_distance = (TextView) findViewById(R.id.txt_distance);
         txt_duration = (TextView) findViewById(R.id.txt_duration);
     }
-    private void searchLocation(){
+
+    private void searchLocation() {
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         searchViewLocation.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -351,15 +372,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Geocoder geocoder = new Geocoder(getApplicationContext());
                 try {
                     //delete the old marker
-                    if (markerSearch != null){ //nếu không kiểm tra đk này thì lúc đầu chưa có sẽ xóa luôn marker => k có marker này để mark nữa
+                    if (markerSearch != null) { //nếu không kiểm tra đk này thì lúc đầu chưa có sẽ xóa luôn marker => k có marker này để mark nữa
                         markerSearch.remove();
                     }
                     //
                     String location = searchViewLocation.getQuery().toString();
-                    List <Address> addressList = null;
-                    if(location != null || !location.equals("")) {
+                    List<Address> addressList = null;
+                    if (location != null || !location.equals("")) {
                         try {
-                            addressList = geocoder.getFromLocationName(location,1);
+                            addressList = geocoder.getFromLocationName(location, 1);
                         } catch (Exception e) {
                         }
                         if (addressList.size() > 0) {
@@ -370,7 +391,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
 
                         } else {
-                            List <Address> addresses = geocoder.getFromLocation(currentLatitude, currentLongtitude, 1);
+                            List<Address> addresses = geocoder.getFromLocation(currentLatitude, currentLongtitude, 1);
                             String str = addresses.get(0).getLocality();
                             str = str + " " + addresses.get(0).getAdminArea();
                             str = str + " " + addresses.get(0).getCountryName();
@@ -381,12 +402,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             addressList = geocoder.getFromLocationName(location, 1);
                             Address address = addressList.get(0);
 
-                            if(address.getThoroughfare() != null){
+                            if (address.getThoroughfare() != null) {
                                 LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
 
                                 markerSearch = mMap.addMarker(new MarkerOptions().position(latLng).title(address.getAddressLine(0)));
                                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
-                            }else{
+                            } else {
                                 Toast.makeText(MapsActivity.this, "Don't have this address", Toast.LENGTH_SHORT).show();
                             }
                         }
@@ -395,6 +416,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
                 return false;
             }
+
             @Override
             public boolean onQueryTextChange(String s) {
                 return false;
@@ -402,99 +424,102 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
         mapFragment.getMapAsync(MapsActivity.this); //when you already implement OnMapReadyCallback in your fragment
     }
-  private void joinDialog(final String url){
-            //set event for marker to display join dialog
-            mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-                @Override
-                public boolean onMarkerClick(final Marker m) {
 
-                    //marker search can't join
-                    if(markerSearch != null) {
-                        if ((m.getPosition().latitude == markerSearch.getPosition().latitude)
-                                && (m.getPosition().longitude == markerSearch.getPosition().longitude)) {
-                            return false;
-                        }
+    private void joinDialog(final String url) {
+        //set event for marker to display join dialog
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(final Marker m) {
+
+                //marker search can't join
+                if (markerSearch != null) {
+                    if ((m.getPosition().latitude == markerSearch.getPosition().latitude)
+                            && (m.getPosition().longitude == markerSearch.getPosition().longitude)) {
+                        return false;
                     }
-                    Geocoder geocoder = new Geocoder(getApplicationContext());
-                    List<Address> addressList = null;
-                    try {
-                        addressList = geocoder.getFromLocation(m.getPosition().latitude, m.getPosition().longitude, 1);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                }
+                Geocoder geocoder = new Geocoder(getApplicationContext());
+                List<Address> addressList = null;
+                try {
+                    addressList = geocoder.getFromLocation(m.getPosition().latitude, m.getPosition().longitude, 1);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
-                    String waste_address = addressList.get(0).getAddressLine(0);
-                    final Bundle bundle = new Bundle();
+                String waste_address = addressList.get(0).getAddressLine(0);
+                final Bundle bundle = new Bundle();
 
-                    bundle.putString("waste_address", waste_address);
-                    bundle.putDouble("currentLatitude", currentLatitude);
-                    bundle.putDouble("currentLongtitude", currentLongtitude);
-                    bundle.putDouble("wasteLatitude", m.getPosition().latitude);
-                    bundle.putDouble("wasteLongtitude", m.getPosition().longitude);
-                    bundle.putString("username",username);
-                    bundle.putString("dateOfBirth",dateOfBirth);
-                    bundle.putString("userJob",userJob);
-                    bundle.putString("userGender",userGender);
-                    bundle.putString("userID",userID);
-                    bundle.putString("userScore",userScore);
-                    Log.e("CheckABC",   userID +"-"
-                            +dateOfBirth+"-"+userJob+"-"+userGender+"-"+userScore);
-                    RequestQueue requestQueue = Volley.newRequestQueue(MapsActivity.this);
-                    JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
-                        @Override
-                        public void onResponse(JSONArray response) {
-                            for (int i = 0; i < response.length(); i++) {
-                                try {
-                                    JSONObject object = response.getJSONObject(i);
-                                    double wasteLocation_latitude = Double.parseDouble(object.getString("waste_latitude"));
-                                    double wasteLocation_longtitude = Double.parseDouble(object.getString("waste_longtitude"));
-                                    if(wasteLocation_latitude == m.getPosition().latitude && wasteLocation_longtitude == m.getPosition().longitude){
-                                        String waste_people = object.getString("waste_biod");
-                                        String waste_size = object.getString("waste_size");
-                                        String waste_image = object.getString("waste_image");
-                                        bundle.putString("waste_people", waste_people);
-                                        bundle.putString("waste_size", waste_size);
-                                        bundle.putString("waste_image",waste_image);
-                                        joinDialog dialog = new joinDialog();
-                                        dialog.setArguments(bundle);
-                                        dialog.show(getSupportFragmentManager(), "example");
-                                        return;
-                                    }
-
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
+                bundle.putString("waste_address", waste_address);
+                bundle.putDouble("currentLatitude", currentLatitude);
+                bundle.putDouble("currentLongtitude", currentLongtitude);
+                bundle.putDouble("wasteLatitude", m.getPosition().latitude);
+                bundle.putDouble("wasteLongtitude", m.getPosition().longitude);
+                bundle.putString("username", username);
+                bundle.putString("dateOfBirth", dateOfBirth);
+                bundle.putString("userJob", userJob);
+                bundle.putString("userGender", userGender);
+                bundle.putString("userID", userID);
+                bundle.putString("userScore", userScore);
+                Log.e("CheckABC", userID + "-"
+                        + dateOfBirth + "-" + userJob + "-" + userGender + "-" + userScore);
+                RequestQueue requestQueue = Volley.newRequestQueue(MapsActivity.this);
+                JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        for (int i = 0; i < response.length(); i++) {
+                            try {
+                                JSONObject object = response.getJSONObject(i);
+                                double wasteLocation_latitude = Double.parseDouble(object.getString("waste_latitude"));
+                                double wasteLocation_longtitude = Double.parseDouble(object.getString("waste_longtitude"));
+                                if (wasteLocation_latitude == m.getPosition().latitude && wasteLocation_longtitude == m.getPosition().longitude) {
+                                    String waste_people = object.getString("waste_biod");
+                                    String waste_size = object.getString("waste_size");
+                                    String waste_image = object.getString("waste_image");
+                                    bundle.putString("waste_people", waste_people);
+                                    bundle.putString("waste_size", waste_size);
+                                    bundle.putString("waste_image", waste_image);
+                                    joinDialog dialog = new joinDialog();
+                                    dialog.setArguments(bundle);
+                                    dialog.show(getSupportFragmentManager(), "example");
+                                    return;
                                 }
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
                             }
                         }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(MapsActivity.this,error.toString(),Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                    requestQueue.add(jsonArrayRequest);
-                    return true;
-                }
-            });
-  }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(MapsActivity.this, error.toString(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+                requestQueue.add(jsonArrayRequest);
+                return true;
+            }
+        });
+    }
+
     @Override
     public void onDirectionFinderStart() {
-        if(polyLinePaths != null){
-            for(Polyline polyLine : polyLinePaths){
+        if (polyLinePaths != null) {
+            for (Polyline polyLine : polyLinePaths) {
                 polyLine.remove();
             }
         }
     }
+
     @Override
     public void onDirectionFinderSuccess(List<Route> routes) {
         onDirectionFinderStart();
         polyLinePaths = new ArrayList<>();
-        for( Route route: routes){
+        for (Route route : routes) {
             txt_duration.setText(route.duration + " m");
             txt_distance.setText(route.distance + " km");
-          PolylineOptions polylineOptions = new PolylineOptions().geodesic(true).color(Color.RED).width(10);
+            PolylineOptions polylineOptions = new PolylineOptions().geodesic(true).color(Color.RED).width(10);
 
-            for( int i = 0; i <route.points.size();i++ ){
+            for (int i = 0; i < route.points.size(); i++) {
                 polylineOptions.add(route.points.get(i));
             }
             polyLinePaths.add(mMap.addPolyline(polylineOptions));
@@ -502,17 +527,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
-    public void changeColorJoinMaker(double wasteJoinLat, double wasteJoinLon, String wasteID, String wasteAddress ) {
-        for(int i = 0; i < markerWasteList.size(); i++){
-                if(markerWasteList.get(i).getPosition().latitude == wasteJoinLat && markerWasteList.get(i).getPosition().longitude == wasteJoinLon){
-                    markerWasteList.get(i).setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+    public void changeColorJoinMaker(double wasteJoinLat, double wasteJoinLon, String wasteID, String wasteAddress) {
+        for (int i = 0; i < markerWasteList.size(); i++) {
+            if (markerWasteList.get(i).getPosition().latitude == wasteJoinLat && markerWasteList.get(i).getPosition().longitude == wasteJoinLon) {
+                markerWasteList.get(i).setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
 
-                    if(wasteID != null) {
-                        markerJoin.add(markerWasteList.get(i));
-                        this.wasteID = wasteID;
-                    }
-                    break;
+                if (wasteID != null) {
+                    markerJoin.add(markerWasteList.get(i));
+                    this.wasteID = wasteID;
                 }
+                break;
+            }
         }
     }
 
