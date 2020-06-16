@@ -70,8 +70,8 @@ public class Checkin extends AppCompatActivity implements  View.OnClickListener{
     BufferedReader bufferedReader;
     StringBuilder stringBuilder;
     boolean check = true;
-    String urlCheckin = "http://192.168.1.4/ub/checkin.php";
-    String urlGetJoin = "http://192.168.1.4/ub/getJoin.php";
+    String urlCheckin = "http://10.141.128.59/ub/checkin.php";
+    String urlGetJoin = "http://10.141.128.59/ub/getJoin.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

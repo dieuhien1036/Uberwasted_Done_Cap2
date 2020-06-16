@@ -35,8 +35,8 @@ public class FeedbackActivity extends AppCompatActivity {
     private TextView txt_userID;
     private EditText edt_email;
     Button btnOK;
-    private String urlGetUserID ="http://192.168.1.4/androidwebservice/login.php";
-    private String urlInsert = "http://192.168.1.4/androidwebservice/feedback.php";
+    private String urlGetUserID ="http://10.141.128.59/androidwebservice/login.php";
+    private String urlInsert = "http://10.141.128.59/androidwebservice/feedback.php";
     private String feedbackStatus="";
     private String feedbackContent="";
     String user_ID;

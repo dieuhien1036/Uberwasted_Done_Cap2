@@ -26,22 +26,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.RetryPolicy;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
-import com.google.firebase.messaging.FirebaseMessaging;
-
-import net.gotev.uploadservice.MultipartUploadRequest;
 import net.gotev.uploadservice.UploadServiceBroadcastReceiver;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -61,12 +46,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class ReportActivity extends AppCompatActivity
-{
+public class ReportActivity extends AppCompatActivity {
     private final String cardboard_big = "cardboard_big_biod";
     private final String cardboard_small = "cardboard_small_biod";
     private final String metal_big = "metal_big_nonbiod";
@@ -82,7 +65,7 @@ public class ReportActivity extends AppCompatActivity
 
 
     private static String JSON_STRING;
-    private static final String UPLOAD_URL = "http://192.168.1.4/upload/upload_to_server.php";
+    private static final String UPLOAD_URL = "http://10.141.128.59/upload/upload_to_server.php";
     private static final int STORAGE_PERMISSION_CODE = 123;
     private ImageView imageView;
     private String size = "small";
@@ -113,8 +96,8 @@ public class ReportActivity extends AppCompatActivity
     BufferedReader bufferedReader;
     StringBuilder stringBuilder;
     boolean check = true;
-    String urlUploadForCompare = "http://192.168.1.4/upload/uploadForCompare.php";
-    String urlUploadToServer = "http://192.168.1.4/upload/uploadToServer.php";
+    String urlUploadForCompare = "http://10.141.128.59/upload/uploadForCompare.php";
+    String urlUploadToServer = "http://10.141.128.59/upload/uploadToServer.php";
 
 
     @Override
@@ -156,168 +139,6 @@ public class ReportActivity extends AppCompatActivity
         btnReport = findViewById((R.id.btnReport));
         tvIdmax = findViewById(R.id.idmax);
     }
-
-
-    public void updateImageWasteForClassification() {
-        String url = "http://192.168.1.4/upload/upload_for_compare.php";
-        String caption = " ";
-
-        //getting the actual path of the image
-        String path = getPath(filePath);
-        Intent intent = getIntent();
-        latitude = intent.getDoubleExtra("wasteLocation_latitude", 0.);
-        longtitude = intent.getDoubleExtra("wasteLocation_longtitude", 0.);
-        addressWaste = intent.getStringExtra("wasteLocation_address");
-        //Uploading code
-        try {
-            String uploadId = UUID.randomUUID().toString();
-            //Creating a multi part requestẽ
-            new MultipartUploadRequest(this, uploadId, url)
-                    .addFileToUpload(path, "image") //Adding file
-                    .addParameter("size", size) //Adding text parameter to the request
-                    .addParameter("wasteLocation_longtitude", String.valueOf(longtitude))
-                    .addParameter("wasteLocation_latitude", String.valueOf(latitude))
-                    .addParameter("wasteLocation_address", String.valueOf(addressWaste))
-//                    .setNotificationConfig(new UploadNotificationConfig())
-                    .setMaxRetries(2)
-                    .startUpload(); //Starting the upload
-        } catch (Exception exc) {
-        }
-    }
-
-
-    public void uploadImageToServer() {
-        long millis = System.currentTimeMillis();
-        java.sql.Date date = new java.sql.Date(millis);
-        Intent intent = getIntent();
-        latitude = intent.getDoubleExtra("wasteLocation_latitude", 0.);
-        longtitude = intent.getDoubleExtra("wasteLocation_longtitude", 0.);
-        addressWaste = intent.getStringExtra("wasteLocation_address");
-
-        if (radioButton_Small.isChecked()) {
-            size = small_size;
-        }
-        if (radioButton_Large.isChecked()) {
-            size = big_size;
-        }
-
-        if (radioButton_biod.isChecked()) {
-            biod = biod_type;
-        }
-        if (radioButton_nobiod.isChecked()) {
-            biod = noBiod_type;
-        }
-        String material = etMaterial.getText().toString().trim();
-
-        switch (size) {
-            case big_size: {
-                switch (material) {
-                    case "cardboard": {
-                        folder = cardboard_big;
-                        break;
-                    }
-                    case "metal": {
-                        folder = metal_big;
-                        break;
-                    }
-                    case "glass": {
-                        folder = glass_big;
-                        break;
-                    }
-                    case "plastic": {
-                        folder = plastic_big;
-                    }
-                }
-                break;
-            }
-            case small_size: {
-                switch (material) {
-                    case "cardboard": {
-                        folder = cardboard_small;
-                        break;
-                    }
-                    case "metal": {
-                        folder = metal_small;
-                        break;
-                    }
-                    case "glass": {
-                        folder = glass_small;
-                        break;
-                    }
-                    case "plastic": {
-                        folder = plastic_small;
-                    }
-                }
-                break;
-            }
-            default: {
-            }
-        }
-
-        //getting the actual path of the image
-        String path = getPath(filePath);
-
-        //Uploading code
-        try {
-            String uploadId = UUID.randomUUID().toString();
-            //Creating a multi part request
-            new MultipartUploadRequest(this, uploadId, UPLOAD_URL)
-                    .addFileToUpload(path, "image") //Adding file
-                    .addParameter("file_folder", folder)
-                    .addParameter("size", size)
-                    .addParameter("material", material)
-                    .addParameter("biod", biod)
-                    .addParameter("wasteLocation_longtitude", String.valueOf(longtitude))
-                    .addParameter("wasteLocation_latitude", String.valueOf(latitude))
-                    .addParameter("wasteLocation_address", String.valueOf(addressWaste))
-                    .addParameter("waste_date", String.valueOf(date))
-//                    .setNotificationConfig(new UploadNotificationConfig())
-                    .setMaxRetries(2)
-                    .startUpload(); //Starting the upload
-
-        } catch (Exception exc) {
-            Toast.makeText(this, exc.getMessage(), Toast.LENGTH_SHORT).show();
-        }
-    }
-
-
-    private UploadServiceBroadcastReceiver receiver = new UploadServiceBroadcastReceiver() {
-        @Override
-        public void onCompleted(String uploadId, int serverResponseCode, byte[] serverResponseBody) {
-            super.onCompleted(uploadId, serverResponseCode, serverResponseBody);
-            getResult();
-        }
-    };
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        receiver.register(this);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        receiver.unregister(this);
-    }
-
-    public String getPath(Uri uri) {
-        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-        cursor.moveToFirst();
-        String document_id = cursor.getString(0);
-        document_id = document_id.substring(document_id.lastIndexOf(":") + 1);
-        cursor.close();
-
-        cursor = getContentResolver().query(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                null, MediaStore.Images.Media._ID + " = ? ", new String[]{document_id}, null);
-        cursor.moveToFirst();
-        String path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
-        cursor.close();
-
-        return path;
-    }
-
     private void requestStoragePermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
             return;
@@ -331,8 +152,6 @@ public class ReportActivity extends AppCompatActivity
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
     }
 
-    //This method will be called when the user will tap on allow or deny
-
     public void getResult() {
         new readWaste().execute();
     }
@@ -342,7 +161,7 @@ public class ReportActivity extends AppCompatActivity
 
         @Override
         protected void onPreExecute() {
-            url = "http://192.168.1.4/upload/getMaterial.php";
+            url = "http://10.141.128.59/upload/getMaterial.php";
         }
 
         @Override
@@ -389,138 +208,6 @@ public class ReportActivity extends AppCompatActivity
             }
         }
     }
-
-    public static class SingleUploadBroadcastReceiver extends UploadServiceBroadcastReceiver {
-
-        public interface Delegate {
-            void onProgress(int progress);
-
-            void onProgress(long uploadedBytes, long totalBytes);
-
-            void onError(Exception exception);
-
-            void onCompleted(int serverResponseCode, byte[] serverResponseBody);
-
-            void onCancelled();
-        }
-
-        private String mUploadID;
-        private Delegate mDelegate;
-
-        public void setUploadID(String uploadID) {
-            mUploadID = uploadID;
-        }
-
-        public void setDelegate(Delegate delegate) {
-            mDelegate = delegate;
-        }
-
-        @Override
-        public void onProgress(String uploadId, int progress) {
-            if (uploadId.equals(mUploadID) && mDelegate != null) {
-                mDelegate.onProgress(progress);
-            }
-        }
-
-        @Override
-        public void onProgress(String uploadId, long uploadedBytes, long totalBytes) {
-            if (uploadId.equals(mUploadID) && mDelegate != null) {
-                mDelegate.onProgress(uploadedBytes, totalBytes);
-            }
-        }
-
-        @Override
-        public void onError(String uploadId, Exception exception) {
-            if (uploadId.equals(mUploadID) && mDelegate != null) {
-                mDelegate.onError(exception);
-            }
-        }
-
-        @Override
-        public void onCompleted(String uploadId, int serverResponseCode, byte[] serverResponseBody) {
-            if (uploadId.equals(mUploadID) && mDelegate != null) {
-                mDelegate.onCompleted(serverResponseCode, serverResponseBody);
-            }
-        }
-
-        @Override
-        public void onCancelled(String uploadId) {
-            if (uploadId.equals(mUploadID) && mDelegate != null) {
-                mDelegate.onCancelled();
-            }
-        }
-    }
-
-    private void sendFCMPush() {
-
-        Intent intent = getIntent();
-        latitude = intent.getDoubleExtra("wasteLocation_latitude", 0.);
-        longtitude = intent.getDoubleExtra("wasteLocation_longtitude", 0.);
-        addressWaste = intent.getStringExtra("wasteLocation_address");
-        MapsActivity m = new MapsActivity();
-        final String SERVER_KEY = "AAAA5X8ZDBE:APA91bHDkSbJW0In5hLU_8mOwP9zhNuD_E3WzYi8-0W0UT_rAdIPy3HrmaxNlP__KjmipMjaaJ08AqQeB591ynOeMEKj2k31e-bm1y1jFUq_HvhonynWJkJVEjoR6DojXts2MTtM_AQB";
-        String title = "Uber";
-        String msg = "Have new waste near " + String.valueOf(addressWaste);
-        String token = "epcG9vI67-E:APA91bFZH6i48Tm_6i2Ykf30JmHFjP0_rcv2Emqyc0ekk8GXTV4LtSc8DgxsjMrPJCJLnBqQBqRbGEzY7CuNYmIUwVgS1A0uTRUJgFRp_3O3-mYpYy4L4LaVGQi1XTVv1leadOuhEFJc";
-
-        JSONObject obj = null;
-        JSONObject objData = null;
-        JSONObject dataobjData = null;
-
-        try {
-            obj = new JSONObject();
-            objData = new JSONObject();
-
-            objData.put("body", msg);
-            objData.put("title", title);
-            //objData.put("sound", "default");
-            //objData.put("icon", "icon_name"); //   icon_name
-            //objData.put("tag", "/topics/allDevices");
-            objData.put("priority", "high");
-
-            dataobjData = new JSONObject();
-            dataobjData.put("text", msg);
-            dataobjData.put("title", title);
-
-            obj.put("to", "/topics/allDevices");
-            //obj.put("priority", "high");
-
-            obj.put("notification", objData);
-            obj.put("data", dataobjData);
-            Log.e("return here>>", obj.toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.POST, "https://fcm.googleapis.com/fcm/send", obj,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        Log.e("True", response + "");
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.e("False", error + "");
-                    }
-                }) {
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("Authorization", "key=" + SERVER_KEY);
-                params.put("Content-Type", "application/json");
-                return params;
-            }
-        };
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        int socketTimeout = 1000 * 60;// 60 seconds
-        RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
-        jsObjRequest.setRetryPolicy(policy);
-        requestQueue.add(jsObjRequest);
-        FirebaseMessaging.getInstance().subscribeToTopic("allDevices");
-    }
-
 
     private void showPictureDialog() {
         AlertDialog.Builder pictureDialog = new AlertDialog.Builder(this);

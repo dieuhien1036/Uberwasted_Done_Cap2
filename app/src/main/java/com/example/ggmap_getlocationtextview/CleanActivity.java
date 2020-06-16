@@ -32,9 +32,9 @@ public class CleanActivity extends AppCompatActivity {
     ListView listView;
     AdapterListView adapterListView;
     joinDialog.BottomSheetListener mListener;
-    String urlDelete = "http://192.168.1.4/androidwebservice/deleteJoin.php";
-    String url = "http://192.168.1.4/androidwebservice/WasteJoin.php";
-    String urlCheckin = "http://192.168.1.4/androidwebservice/checkIn.php";
+    String urlDelete = "http://10.141.128.59/androidwebservice/deleteJoin.php";
+    String url = "http://10.141.128.59/androidwebservice/WasteJoin.php";
+    String urlCheckin = "http://10.141.128.59/androidwebservice/checkIn.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

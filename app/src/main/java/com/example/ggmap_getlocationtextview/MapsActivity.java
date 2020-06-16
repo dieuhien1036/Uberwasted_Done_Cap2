@@ -21,13 +21,20 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -42,6 +49,12 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 
@@ -51,15 +64,31 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, joinDialog.BottomSheetListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, joinDialog.BottomSheetListener,
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
+    //location
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationClient;
     private final int locationRequestCode = 1;
     private double currentLatitude = 0.0;
     private double currentLongtitude = 0.0;
+
+    private static final int MY_PERMISSION_REQUEST_CODE = 7171;
+    private static final int PLAY_SERVICES_REQUEST = 7172;
+
+    private GoogleApiClient mGoogleApiClient;
+    private Location mLastLocation;
+    private LocationRequest mLocationRequest;
+
+    private static int UPDATE_INTERVAL = 10000;
+    private static int FASTEST_INTERVEL = 10000;
+
+    private static int DISTANCE = 10;
 
     private joinDialog.BottomSheetListener mListener;
 
@@ -83,15 +112,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     String userGender = null;
     String userID = null;
     String userScore = null;
-    String url = "http://192.168.1.4/androidwebservice/wasteLocation.php";
-    String getWasteJoinURL = "http://192.168.1.4/androidwebservice/WasteJoin.php";
+    String url = "http://10.141.128.59/androidwebservice/wasteLocation.php";
+    String getWasteJoinURL = "http://10.141.128.59/androidwebservice/WasteJoin.php";
     String wasteID = null;
+
+    //Firebase
+    public DatabaseReference currentUserRef, locations;
+    public String currentUserToken;
+
+    //Notification
+    private String FCM_API = "https://fcm.googleapis.com/fcm/send";
+    private String serverKey =
+            "key=" + "AAAAb-lvNCk:APA91bHm1qhc2NdbsXHnSNAd9F99NeDZ0oCUAM94m4ON_gtnucW13fhtWVuzHehmkEr-5CRkR2-2awBwFYWR3ZUjGkoziIFJ5RgQm5hdN4j7HQpuCLKX18Fp8U6IoJhoau5_rzDTNfqs";
+    private String contentType = "application/json";
+
+    String NOTIFICATION_TITLE;
+    String NOTIFICATION_MESSAGE;
+    List<String> TOPIC = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         Intent mapActivityIntent = getIntent();
@@ -133,13 +175,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             Log.d("ABC", "getInstanceId failed", task.getException());
                             return;
                         }
-
                         // Get new Instance ID token
-                        String token = task.getResult().getToken();
-                        Log.d("ABC123", token);
+                        currentUserToken = task.getResult().getToken();
+                        Log.d("ABC123", currentUserToken);
                     }
                 });
 
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+            }, MY_PERMISSION_REQUEST_CODE);
+        } else {
+            if (checkPlayServices()) {
+                buildGoogleApiClient();
+                createLocationRequest();
+                displayLocation();
+            }
+        }
+        setUpFirebase();
     }
 
     private void ranking() {
@@ -281,6 +336,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             case locationRequestCode: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     checkPermisson();
+                }
+            }
+            case MY_PERMISSION_REQUEST_CODE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if (checkPlayServices()) {
+                        buildGoogleApiClient();
+                        createLocationRequest();
+                        displayLocation();
+                    }
                 }
             }
         }
@@ -544,5 +608,208 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void createLocationRequest() {
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(UPDATE_INTERVAL);
+        mLocationRequest.setFastestInterval(FASTEST_INTERVEL);
+        mLocationRequest.setSmallestDisplacement(DISTANCE);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
+
+    private void displayLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        if (mLastLocation != null) {
+            locations = FirebaseDatabase.getInstance().getReference("locations");
+            currentUserRef = FirebaseDatabase.getInstance().getReference("locations");
+            currentUserRef.child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(new TrackingLocation(
+                    FirebaseAuth.getInstance().getCurrentUser().getEmail(),
+                    FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                    currentUserToken,
+                    mLastLocation.getLatitude(),
+                    mLastLocation.getLongitude()
+            ));
+        } else {
+            Toast.makeText(this, "Couldn't get the location", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private boolean checkPlayServices() {
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
+                GooglePlayServicesUtil.getErrorDialog(resultCode, this, PLAY_SERVICES_REQUEST).show();
+            } else {
+                Toast.makeText(this, "This device is not supported", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+            return false;
+        }
+        return true;
+    }
+
+    private void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API).build();
+    }
+
+    private void startLocationUpdate() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        mLastLocation = location;
+        displayLocation();
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        displayLocation();
+        startLocationUpdate();
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (mGoogleApiClient != null)
+            mGoogleApiClient.connect();
+    }
+
+    @Override
+    protected void onStop() {
+        if (mGoogleApiClient != null)
+            mGoogleApiClient.disconnect();
+        super.onStop();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        checkPlayServices();
+    }
+
+    private void setUpFirebase() {
+        locations = FirebaseDatabase.getInstance().getReference("locations");
+        locations.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                TOPIC.clear();
+                for (DataSnapshot location : dataSnapshot.getChildren()) {
+                    TrackingLocation tracking = location.getValue(TrackingLocation.class);
+                    LatLng volunteerLocation = new LatLng(tracking.getLat(), tracking.getLng());
+
+                    Location currentUser = new Location("");
+                    currentUser.setLatitude(currentLatitude);
+                    currentUser.setLongitude(currentLongtitude);
+
+                    Location volunteer = new Location("");
+                    currentUser.setLatitude(tracking.getLat());
+                    currentUser.setLongitude(tracking.getLng());
+
+                    if (distance(currentUser, volunteer) < 3000.0) {
+                        if (TOPIC.add(tracking.getToken()))
+                            mMap.addMarker(new MarkerOptions()
+                                    .position(volunteerLocation)
+                                    .title(tracking.getEmail())
+                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(currentLatitude, currentLongtitude), 12.0f));
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+//                locations.onDisconnect().removeValue();
+            }
+        });
+    }
+
+    private double distance(Location user, Location volunteer) {
+        double theta = user.getLatitude() - volunteer.getLatitude();
+        double dist = Math.sin(deg2rad(user.getLatitude()))
+                * Math.sin(deg2rad(volunteer.getLatitude()))
+                * Math.cos(deg2rad(user.getLongitude()))
+                * Math.cos(deg2rad(volunteer.getLongitude()))
+                * Math.cos(deg2rad(theta));
+        dist = Math.acos(dist);
+        dist = rad2deg((dist));
+        dist = dist * 60 * 1.1515;
+        return dist;
+    }
+
+    private double rad2deg(double dist) {
+        return (dist * 180 / Math.PI);
+    }
+
+    private double deg2rad(double deg) {
+        return (deg * Math.PI / 180.0);
+    }
+
+    private void pushNofication() {
+        TOPIC.add("cKxwLkW2vis:APA91bEYAHtVxEeUr53ZBBSMQdFKuQCYRJa0JqPquQXJu" +
+                "nHZIQG7U4UHHAhco_mX4Hc27WxRRulyRXYunKlSbljN7-0u0JPoHmxOSv-ZdRSr470F22YAdxXGZZvEzBc3NcwuhiVSO6TA");
+        NOTIFICATION_TITLE = "UberWaste";
+        NOTIFICATION_MESSAGE = "Have new a waste near you";
+        JSONObject notification = new JSONObject();
+        JSONObject notificationBody = new JSONObject();
+        try {
+            notificationBody.put("title", NOTIFICATION_TITLE);
+            notificationBody.put("message", NOTIFICATION_MESSAGE);
+
+            notification.put("registration_ids", TOPIC);
+            notification.put("data", notificationBody);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        sendFCM(notification);
+    }
+
+    private void sendFCM(JSONObject notification) {
+        Log.e("TAG:D", "send notification");
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(FCM_API,
+                notification,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Toast.makeText(MapsActivity.this, response.toString(), Toast.LENGTH_LONG).show();
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(MapsActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap();
+                params.put("Authorization", serverKey);
+                params.put("Content-Type", contentType);
+                return params;
+            }
+        };
+        MySingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonObjectRequest);
     }
 }
