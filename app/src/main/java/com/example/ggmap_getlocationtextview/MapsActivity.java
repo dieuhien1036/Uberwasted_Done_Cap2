@@ -2,6 +2,7 @@ package com.example.ggmap_getlocationtextview;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -92,6 +93,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private joinDialog.BottomSheetListener mListener;
 
+    private Integer INTENT_ACTIVITY_FOR_RESULT = 1;
+
     Marker markerSearch;
     Marker markerWaste;
     List<Marker> markerJoin = new ArrayList<>();
@@ -112,8 +115,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     String userGender = null;
     String userID = null;
     String userScore = null;
-    String url = "http://10.141.128.59/androidwebservice/wasteLocation.php";
-    String getWasteJoinURL = "http://10.141.128.59/androidwebservice/WasteJoin.php";
+    String url = "http://10.10.51.193/androidwebservice/wasteLocation.php";
+    String getWasteJoinURL = "http://10.10.51.193/androidwebservice/WasteJoin.php";
     String wasteID = null;
 
     //Firebase
@@ -292,8 +295,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 intent.putExtra("wasteLocation_latitude", currentLatitude);
                 intent.putExtra("wasteLocation_longtitude", currentLongtitude);
                 intent.putExtra("wasteLocation_address", addressWaste);
-
-                startActivity(intent);
+                startActivityForResult(intent, INTENT_ACTIVITY_FOR_RESULT);
 
             }
         });
@@ -608,6 +610,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1) {
+            if (resultCode == Activity.RESULT_OK) {
+                Boolean result = data.getBooleanExtra("result", false);
+            }
+            if (resultCode == Activity.RESULT_CANCELED) {
+                //Write your code if there's no result
+            }
+        }
     }
 
     private void createLocationRequest() {

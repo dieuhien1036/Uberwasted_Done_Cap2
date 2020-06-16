@@ -14,10 +14,20 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class LoginActivity extends AppCompatActivity {
     EditText edt_Email;
@@ -26,7 +36,7 @@ public class LoginActivity extends AppCompatActivity {
     LinearLayout linearLayout;
     Button btn_ForgotPassword;
     Button btn_Register;
-    String url = "http://192.168.1.5/androidwebservice/login.php";
+    String getProfileUrl = "http://10.10.51.193/androidwebservice/login.php";
 
     UserModel userModel = null;
     SharedPreferences sharedPreferences;
@@ -59,7 +69,7 @@ public class LoginActivity extends AppCompatActivity {
                 userModel = new UserModel(email, password);
                 if (checkEmptyFormat() == true) {
 
-                    checkLogin(url);
+                    checkLogin();
                 }
 
             }
@@ -100,7 +110,7 @@ public class LoginActivity extends AppCompatActivity {
         return true;
     }
 
-    private void checkLogin(String url) {
+    private void checkLogin() {
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseAuth.signInWithEmailAndPassword(userModel.getEmail(), userModel.getPassword()).addOnCompleteListener(LoginActivity.this, new OnCompleteListener<com.google.firebase.auth.AuthResult>() {
             @Override
@@ -108,8 +118,7 @@ public class LoginActivity extends AppCompatActivity {
                 if (!task.isSuccessful()) {
                     Toast.makeText(LoginActivity.this, "Login Failed!", Toast.LENGTH_SHORT).show();
                 } else {
-                    Intent intentHome = new Intent(LoginActivity.this, MapsActivity.class);
-                    startActivity(intentHome);
+                    getUserProfile(getProfileUrl);
                 }
             }
         });
@@ -122,5 +131,50 @@ public class LoginActivity extends AppCompatActivity {
         linearLayout = (LinearLayout) findViewById(R.id.linear);
         btn_ForgotPassword = (Button) findViewById(R.id.btn_ForgotPassword);
         btn_Register = findViewById(R.id.btn_register);
+    }
+
+
+    private void getUserProfile(String url) {
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                for (int i = 0; i < response.length(); i++) {
+                    try {
+                        JSONObject object = response.getJSONObject(i);
+
+                        String email = object.getString("volunteer_email");
+                        String userID = object.getString("volunteer_id");
+                        String firstname = object.getString("volunteer_firstName");
+                        String lastname = object.getString("volunteer_lastName");
+                        String dateOfBirth = object.getString("volunteer_birthDate");
+                        String userJob = object.getString("volunteer_job");
+                        String userGender = object.getString("volunteer_gender");
+                        String userScore = object.getString("volunteer_score");
+
+                        if (email.equals(edt_Email.getText().toString().trim()) == true) {
+                            Intent mapActivityIntent = new Intent(LoginActivity.this, MapsActivity.class);
+                            mapActivityIntent.putExtra("userID", userID);
+                            mapActivityIntent.putExtra("username", firstname + " " + lastname);
+                            mapActivityIntent.putExtra("dateOfBirth", dateOfBirth);
+                            mapActivityIntent.putExtra("userScore", userScore);
+                            mapActivityIntent.putExtra("userJob", userJob);
+                            mapActivityIntent.putExtra("userGender", userGender);
+                            startActivity(mapActivityIntent);
+                            return;
+                        }
+                        //Toast.makeText(LoginActivity.this, "Wrong email or password", Toast.LENGTH_SHORT).show();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(LoginActivity.this, error.toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
+        requestQueue.add(jsonArrayRequest);
     }
 }

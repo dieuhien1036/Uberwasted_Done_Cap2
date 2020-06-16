@@ -1,6 +1,7 @@
 package com.example.ggmap_getlocationtextview;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -65,7 +66,7 @@ public class ReportActivity extends AppCompatActivity {
 
 
     private static String JSON_STRING;
-    private static final String UPLOAD_URL = "http://10.141.128.59/upload/upload_to_server.php";
+    private static final String UPLOAD_URL = "http://10.10.51.193/upload/upload_to_server.php";
     private static final int STORAGE_PERMISSION_CODE = 123;
     private ImageView imageView;
     private String size = "small";
@@ -96,8 +97,8 @@ public class ReportActivity extends AppCompatActivity {
     BufferedReader bufferedReader;
     StringBuilder stringBuilder;
     boolean check = true;
-    String urlUploadForCompare = "http://10.141.128.59/upload/uploadForCompare.php";
-    String urlUploadToServer = "http://10.141.128.59/upload/uploadToServer.php";
+    String urlUploadForCompare = "http://10.10.51.193/upload/uploadForCompare.php";
+    String urlUploadToServer = "http://10.10.51.193/upload/uploadToServer.php";
 
 
     @Override
@@ -161,7 +162,7 @@ public class ReportActivity extends AppCompatActivity {
 
         @Override
         protected void onPreExecute() {
-            url = "http://10.141.128.59/upload/getMaterial.php";
+            url = "http://10.10.51.193/upload/getMaterial.php";
         }
 
         @Override
@@ -517,5 +518,13 @@ public class ReportActivity extends AppCompatActivity {
                 Toast.makeText(ReportActivity.this, "Unable to use Camera..Please Allow us to use Camera", Toast.LENGTH_LONG).show();
             }
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent returnIntent = new Intent();
+        returnIntent.putExtra("result",false);
+        setResult(Activity.RESULT_OK,returnIntent);
+        finish();
     }
 }
