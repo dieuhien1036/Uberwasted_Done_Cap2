@@ -26,6 +26,10 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.core.view.Change;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -52,14 +56,15 @@ public class ChangeProfile extends AppCompatActivity implements View.OnClickList
     private TextView txtEmail;
     private ImageButton btnSave;
     private Dialog feedbackDialog;
-    private String urlInsert = "http://10.10.51.193/androidwebservice/feedback.php";
+    private String urlInsert = "http://192.168.1.4/androidwebservice/feedback.php";
     private String feedbackStatus="";
     private String feedbackContent="";
     private ImageView ava;
-    private String urlGetData = "http://10.10.51.193/ub/getUser.php";
-    private String urlUpload = "http://10.10.51.193/ub/updateProfile.php";
+    private String urlGetData = "http://192.168.1.4/ub/getUser.php";
+    private String urlUpload = "http://192.168.1.4/ub/updateProfile.php";
     private String idReceived;
-
+    private Button btnLogout;
+    private String userUID;
     private static final Pattern NAME_PATTERN =
             Pattern.compile(
                     "[a-zA-Z]"
@@ -81,6 +86,7 @@ public class ChangeProfile extends AppCompatActivity implements View.OnClickList
 
         Intent intent = getIntent();
         idReceived = intent.getStringExtra("userID");
+        userUID = intent.getStringExtra("UID");
         id_Received = Integer.parseInt(idReceived);
         getUserData(urlGetData, id_Received);
 
@@ -89,9 +95,19 @@ public class ChangeProfile extends AppCompatActivity implements View.OnClickList
             public void onClick(View view) {
                 feedbackDialog = new Dialog(ChangeProfile.this);
                 feedbackDialog.setCanceledOnTouchOutside(false);
-
             }
         });
+
+        btnLogout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DatabaseReference dR = FirebaseDatabase.getInstance().getReference("locations").child(userUID);
+                dR.removeValue();
+                Intent intent = new Intent(ChangeProfile.this, LoginActivity.class);
+                startActivity(intent);
+            }
+        });
+
     }
     private void reflect(){
         edtFName = (EditText) findViewById(R.id.edt_firstName);
@@ -104,6 +120,7 @@ public class ChangeProfile extends AppCompatActivity implements View.OnClickList
         ava = (ImageView) findViewById(R.id.imgAva);
         txtEmail = (TextView) findViewById(R.id.text_email);
         btn_feedback = (Button) findViewById(R.id.btn_dat);
+        btnLogout = (Button) findViewById(R.id.btnLogout);
     }
 
     private void getUserData(String url, final int id) {

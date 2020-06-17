@@ -87,8 +87,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Location mLastLocation;
     private LocationRequest mLocationRequest;
 
-    private static int UPDATE_INTERVAL = 180000;
-    private static int FASTEST_INTERVEL = 180000;
+    private static int UPDATE_INTERVAL = 1000;
+    private static int FASTEST_INTERVEL = 10000;
 
     private static int DISTANCE = 10;
 
@@ -117,9 +117,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     String userGender = null;
     String userID = null;
     String userScore = null;
-    String url = "http://10.10.51.193/androidwebservice/wasteLocation.php";
-    String getWasteJoinURL = "http://10.10.51.193/androidwebservice/WasteJoin.php";
+    String url = "http://192.168.1.4/androidwebservice/wasteLocation.php";
+    String getWasteJoinURL = "http://192.168.1.4/androidwebservice/WasteJoin.php";
     String wasteID = null;
+    String address;
 
     //Firebase
     public DatabaseReference currentUserRef, locations;
@@ -177,12 +178,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     @Override
                     public void onComplete(@NonNull Task<InstanceIdResult> task) {
                         if (!task.isSuccessful()) {
-                            Log.d("ABC", "getInstanceId failed", task.getException());
+                            Log.d(MapsActivity.class.getSimpleName(), "getInstanceId failed", task.getException());
                             return;
                         }
                         // Get new Instance ID token
                         currentUserToken = task.getResult().getToken();
-                        Log.d("ABC123", currentUserToken);
+                        Log.d(MapsActivity.class.getSimpleName(), currentUserToken);
                     }
                 });
 
@@ -275,6 +276,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onClick(View view) {
                 Intent intent = new Intent(MapsActivity.this, ChangeProfile.class);
                 intent.putExtra("userID", userID);
+                intent.putExtra("UID", FirebaseAuth.getInstance().getCurrentUser().getUid());
                 startActivity(intent);
             }
         });
@@ -293,6 +295,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
                 String addressWaste = addressList.get(0).getAddressLine(0);
 
+                address = addressWaste;
 
                 Intent intent = new Intent(MapsActivity.this, ReportActivity.class);
                 intent.putExtra("wasteLocation_latitude", currentLatitude);
@@ -530,7 +533,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 bundle.putString("userGender", userGender);
                 bundle.putString("userID", userID);
                 bundle.putString("userScore", userScore);
-                Log.e("CheckABC", userID + "-"
+                Log.e(MapsActivity.class.getSimpleName(), userID + "-"
                         + dateOfBirth + "-" + userJob + "-" + userGender + "-" + userScore);
                 RequestQueue requestQueue = Volley.newRequestQueue(MapsActivity.this);
                 JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
@@ -681,14 +684,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return;
         }
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-        Log.d("AAABBB", "Location Update");
+        Log.d(MapsActivity.class.getSimpleName(), "Location Update");
     }
 
     @Override
     public void onLocationChanged(Location location) {
         mLastLocation = location;
         displayLocation();
-        Log.d("AAABBB", "Location Changed");
+        Log.d(MapsActivity.class.getSimpleName(), "Location Changed");
     }
 
     @Override
@@ -759,7 +762,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     .title(tracking.getEmail())
                                     .icon(icon));
                             markerUserList.add(marker);
-                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(currentLatitude, currentLongtitude), 12.0f));
                         }
                     }
                 }
@@ -769,7 +771,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                locations.getRef().removeValue();
+                String userUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                DatabaseReference dR = FirebaseDatabase.getInstance().getReference("locations").child(userUid);
+                dR.removeValue();
             }
         });
     }
@@ -797,14 +801,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void pushNofication() {
         NOTIFICATION_TITLE = "UberWaste";
-        NOTIFICATION_MESSAGE = "Have new a waste near you";
+        NOTIFICATION_MESSAGE = "Have new a waste near you" + address;
         JSONObject notification = new JSONObject();
         JSONObject notificationBody = new JSONObject();
         try {
             notificationBody.put("title", NOTIFICATION_TITLE);
-            notificationBody.put("message", NOTIFICATION_MESSAGE);
-
-            notification.put("registration_ids", listTokenUser);
+            notificationBody.put("body", NOTIFICATION_MESSAGE);
+            JSONArray arrayTokenUser = new JSONArray();
+            for (int i = 0; i < listTokenUser.size(); i++) {
+                arrayTokenUser.put(listTokenUser.get(i));
+            }
+            notification.put("registration_ids", arrayTokenUser);
             notification.put("notification", notificationBody);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -813,7 +820,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void sendFCM(JSONObject notification) {
-        Log.e("TAG:D", "send notification");
+        Log.e(MapsActivity.class.getSimpleName(), "send notification");
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(FCM_API,
                 notification,
                 new Response.Listener<JSONObject>() {

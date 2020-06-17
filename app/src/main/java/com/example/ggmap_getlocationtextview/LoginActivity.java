@@ -36,7 +36,7 @@ public class LoginActivity extends AppCompatActivity {
     LinearLayout linearLayout;
     Button btn_ForgotPassword;
     Button btn_Register;
-    String getProfileUrl = "http://10.10.51.193/androidwebservice/login.php";
+    String getProfileUrl = "http://192.168.1.4/androidwebservice/login.php";
 
     UserModel userModel = null;
     SharedPreferences sharedPreferences;

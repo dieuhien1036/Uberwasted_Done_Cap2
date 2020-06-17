@@ -92,10 +92,10 @@ public class Checkout extends AppCompatActivity implements View.OnClickListener{
     boolean check = true;
     private SeekBar sk_process;
     private TextView txt_process;
-    String urlCheckout = "http://10.10.51.193/ub/checkout.php";
-    String urlGetCheckinId = "http://10.10.51.193/ub/getCheckinId.php";
-    String urlGetWasteData= "http://10.10.51.193/ub/getWaste.php";
-    String urlUpdateScore = "http://10.10.51.193/ub/score.php";
+    String urlCheckout = "http://192.168.1.4/ub/checkout.php";
+    String urlGetCheckinId = "http://192.168.1.4/ub/getCheckinId.php";
+    String urlGetWasteData= "http://192.168.1.4/ub/getWaste.php";
+    String urlUpdateScore = "http://192.168.1.4/ub/score.php";
     private String  checkinID = "0";
 
     @Override

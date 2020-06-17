@@ -41,7 +41,7 @@ public class joinDialog extends BottomSheetDialogFragment implements DirectionFi
     private TextView txt_size;
     private TextView txt_people;
     public static final int MY_REQUEST_CODE = 100;
-    private String URL = "http://10.10.51.193/upload/uploads/";
+    private String URL = "http://192.168.1.4/upload/uploads/";
 
     @Nullable
     @Override
