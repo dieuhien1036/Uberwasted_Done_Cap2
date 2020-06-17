@@ -6,7 +6,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -26,8 +25,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
-import net.gotev.uploadservice.UploadServiceBroadcastReceiver;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -140,6 +137,7 @@ public class ReportActivity extends AppCompatActivity {
         btnReport = findViewById((R.id.btnReport));
         tvIdmax = findViewById(R.id.idmax);
     }
+
     private void requestStoragePermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
             return;
@@ -402,11 +400,10 @@ public class ReportActivity extends AppCompatActivity {
             @Override
             protected void onPostExecute(String string1) {
                 super.onPostExecute(string1);
-                Intent intentBackMap = new Intent(ReportActivity.this, MapsActivity.class);
-                startActivity(intentBackMap);
+                Intent returnIntent = new Intent();
+                returnIntent.putExtra("result", true);
+                setResult(Activity.RESULT_OK, returnIntent);
                 finish();
-                startActivity(intentBackMap);
-                Toast.makeText(ReportActivity.this, "Upload Successful", Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -523,8 +520,7 @@ public class ReportActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         Intent returnIntent = new Intent();
-        returnIntent.putExtra("result",false);
-        setResult(Activity.RESULT_OK,returnIntent);
+        setResult(Activity.RESULT_CANCELED, returnIntent);
         finish();
     }
 }

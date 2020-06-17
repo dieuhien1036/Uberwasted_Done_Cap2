@@ -41,6 +41,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -86,8 +87,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Location mLastLocation;
     private LocationRequest mLocationRequest;
 
-    private static int UPDATE_INTERVAL = 10000;
-    private static int FASTEST_INTERVEL = 10000;
+    private static int UPDATE_INTERVAL = 180000;
+    private static int FASTEST_INTERVEL = 180000;
 
     private static int DISTANCE = 10;
 
@@ -99,6 +100,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Marker markerWaste;
     List<Marker> markerJoin = new ArrayList<>();
     List<Marker> markerWasteList = new ArrayList<>();
+    List<Marker> markerUserList = new ArrayList<>();
     private List<Polyline> polyLinePaths;
 
     SearchView searchViewLocation;
@@ -131,7 +133,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     String NOTIFICATION_TITLE;
     String NOTIFICATION_MESSAGE;
-    List<String> TOPIC = new ArrayList<String>();
+    List<String> listTokenUser = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -225,7 +227,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             for (int j = 0; j < markerWasteList.size(); j++) {
                                 if (markerWasteList.get(j).getPosition().latitude == wasteJoinLat
                                         && markerWasteList.get(j).getPosition().longitude == wasteJoinLong) {
-                                    markerWasteList.get(j).setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                                    BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(R.drawable.garbage_selected);
+                                    markerWasteList.get(j).setIcon(icon);
 
                                     markerJoin.add(markerWasteList.get(j));
                                 }
@@ -397,7 +400,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         try {
                             List<Address> addressList = geocoder.getFromLocation(wasteLocation_latitude, wasteLocation_longtitude, 1);
                             String str = addressList.get(0).getAddressLine(0);
-                            markerWaste = mMap.addMarker(new MarkerOptions().position(latLng).title(str));
+                            BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(R.drawable.garbage_bag);
+                            markerWaste = mMap.addMarker(new MarkerOptions().position(latLng).title(str).icon(icon));
                             markerWasteList.add(markerWaste);
 
                         } catch (IOException e) {
@@ -595,8 +599,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void changeColorJoinMaker(double wasteJoinLat, double wasteJoinLon, String wasteID, String wasteAddress) {
         for (int i = 0; i < markerWasteList.size(); i++) {
+            BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(R.drawable.garbage_selected);
             if (markerWasteList.get(i).getPosition().latitude == wasteJoinLat && markerWasteList.get(i).getPosition().longitude == wasteJoinLon) {
-                markerWasteList.get(i).setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                markerWasteList.get(i).setIcon(icon);
 
                 if (wasteID != null) {
                     markerJoin.add(markerWasteList.get(i));
@@ -612,10 +617,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1) {
             if (resultCode == Activity.RESULT_OK) {
-                Boolean result = data.getBooleanExtra("result", false);
+                new Thread(new MyRunnable()).start();
             }
             if (resultCode == Activity.RESULT_CANCELED) {
-                //Write your code if there's no result
+
             }
         }
     }
@@ -676,12 +681,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return;
         }
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        Log.d("AAABBB", "Location Update");
     }
 
     @Override
     public void onLocationChanged(Location location) {
         mLastLocation = location;
         displayLocation();
+        Log.d("AAABBB", "Location Changed");
     }
 
     @Override
@@ -725,7 +732,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         locations.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                TOPIC.clear();
+                List token = new ArrayList();
+                for (int i = 0; i < markerUserList.size(); i++) {
+                    markerUserList.get(i).remove();
+                }
                 for (DataSnapshot location : dataSnapshot.getChildren()) {
                     TrackingLocation tracking = location.getValue(TrackingLocation.class);
                     LatLng volunteerLocation = new LatLng(tracking.getLat(), tracking.getLng());
@@ -735,23 +745,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     currentUser.setLongitude(currentLongtitude);
 
                     Location volunteer = new Location("");
-                    currentUser.setLatitude(tracking.getLat());
-                    currentUser.setLongitude(tracking.getLng());
+                    volunteer.setLatitude(tracking.getLat());
+                    volunteer.setLongitude(tracking.getLng());
 
-                    if (distance(currentUser, volunteer) < 3000.0) {
-                        if (TOPIC.add(tracking.getToken()))
-                            mMap.addMarker(new MarkerOptions()
+                    float result[] = new float[10];
+                    Location.distanceBetween(currentLatitude, currentLongtitude, volunteer.getLatitude(), volunteer.getLongitude(), result);
+                    if (result[0] < 3000.0) {
+                        token.add(tracking.getToken());
+                        if (tracking.getToken() != currentUserToken) {
+                            BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(R.drawable.user_waste);
+                            Marker marker = mMap.addMarker(new MarkerOptions()
                                     .position(volunteerLocation)
                                     .title(tracking.getEmail())
-                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(currentLatitude, currentLongtitude), 12.0f));
+                                    .icon(icon));
+                            markerUserList.add(marker);
+                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(currentLatitude, currentLongtitude), 12.0f));
+                        }
                     }
                 }
+                listTokenUser.clear();
+                listTokenUser.addAll(token);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-//                locations.onDisconnect().removeValue();
+                locations.getRef().removeValue();
             }
         });
     }
@@ -778,8 +796,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void pushNofication() {
-        TOPIC.add("cKxwLkW2vis:APA91bEYAHtVxEeUr53ZBBSMQdFKuQCYRJa0JqPquQXJu" +
-                "nHZIQG7U4UHHAhco_mX4Hc27WxRRulyRXYunKlSbljN7-0u0JPoHmxOSv-ZdRSr470F22YAdxXGZZvEzBc3NcwuhiVSO6TA");
         NOTIFICATION_TITLE = "UberWaste";
         NOTIFICATION_MESSAGE = "Have new a waste near you";
         JSONObject notification = new JSONObject();
@@ -788,8 +804,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             notificationBody.put("title", NOTIFICATION_TITLE);
             notificationBody.put("message", NOTIFICATION_MESSAGE);
 
-            notification.put("registration_ids", TOPIC);
-            notification.put("data", notificationBody);
+            notification.put("registration_ids", listTokenUser);
+            notification.put("notification", notificationBody);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -821,5 +837,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         };
         MySingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonObjectRequest);
+    }
+
+    private class MyRunnable implements Runnable {
+        @Override
+        public void run() {
+            pushNofication();
+        }
     }
 }
